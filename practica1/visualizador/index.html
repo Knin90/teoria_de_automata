@@ -208,6 +208,15 @@ table.sum a, .sec a { color: var(--accent); }
 .prac[aria-selected="true"] span { color: var(--accent); }
 .prac:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .trap { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 1px 8px; border: 1px solid currentColor; color: var(--bad); }
+.method { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 14px; display: grid; gap: 4px; }
+.body h4 { margin: 6px 0 0; font-family: var(--display); font-size: 16px; }
+table.why { font-family: var(--body); font-size: 13.5px; min-width: 440px; }
+table.why th, table.why td { text-align: left; vertical-align: top; }
+table.why td.txt { min-width: 200px; }
+table.why code { white-space: nowrap; }
+.ok { color: var(--ok); font-weight: 600; } .no { color: var(--bad); font-weight: 600; }
+details.why-d { margin-top: 12px; }
+details.why-d summary { cursor: pointer; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
 </style>
 
 <div class="wrap">
@@ -703,11 +712,60 @@ let PR = PRACTICAS[0], PROBLEMS = PR.problems;
 
 const KIND = { intro: 'Enunciado', sigma: 'Alfabeto', memory: 'Idea', state: 'Estados', final: 'Aceptación', trans: 'Transiciones', check: 'Verificación', sim: 'Simulación', er: 'Expresión regular', lang: 'Lenguaje' };
 
+/* ---------- ¿cuántos estados hacen falta? ---------- */
+const show = w => w === '' ? 'ε' : w;
+const run = (p, q, w) => [...w].reduce((st, x) => p.delta[st][x][0], q);
+// Cadena más corta que lleva de q0 a cada estado.
+function accessStrings(p) {
+  const acc = { q0: '' }, queue = ['q0'];
+  while (queue.length) {
+    const q = queue.shift();
+    p.sigma.forEach(x => { const t = p.delta[q][x][0]; if (!(t in acc)) { acc[t] = acc[q] + x; queue.push(t); } });
+  }
+  return acc;
+}
+// Continuación más corta que acepta desde un estado y rechaza desde el otro (null si no existe).
+function separator(p, a, b) {
+  const fin = q => p.F.includes(q);
+  const seen = new Set([a + '|' + b]), queue = [[a, b, '']];
+  while (queue.length) {
+    const [x, y, w] = queue.shift();
+    if (fin(x) !== fin(y)) return w;
+    p.sigma.forEach(c => {
+      const nx = p.delta[x][c][0], ny = p.delta[y][c][0], k = nx + '|' + ny;
+      if (!seen.has(k)) { seen.add(k); queue.push([nx, ny, w + c]); }
+    });
+  }
+  return null;
+}
+function pairsTable(p) {
+  const acc = accessStrings(p), qs = p.states.map(st => st.q), rows = [];
+  const verdict = (q, w) => p.F.includes(run(p, q, w)) ? '<span class="ok">se acepta</span>' : '<span class="no">se rechaza</span>';
+  qs.forEach((a, i) => qs.slice(i + 1).forEach(b => {
+    const w = separator(p, a, b);
+    rows.push(w === null
+      ? `<tr><td class="st">${qn(a)} y ${qn(b)}</td><td>—</td><td class="txt">Ninguna continuación los distingue: se podrían juntar en un solo estado.</td></tr>`
+      : `<tr><td class="st">${qn(a)} y ${qn(b)}</td><td><code>${show(w)}</code></td><td class="txt">${qn(a)}: <code>${show(acc[a] + w)}</code> ${verdict(a, w)} · ${qn(b)}: <code>${show(acc[b] + w)}</code> ${verdict(b, w)}</td></tr>`);
+  }));
+  return `<div class="dtab"><table class="why"><thead><tr><th>Par</th><th>Continuación</th><th>Resultado (ejemplo que llega + continuación)</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+}
+function whyStates(p) {
+  const acc = accessStrings(p), n = p.states.length;
+  return `<div class="method"><b>Método</b><span>1. Pregunta: ¿qué es lo mínimo que necesito saber de lo ya leído para decidir con lo que falte? 2. Cada respuesta posible es un estado. 3. Si hay errores sin vuelta atrás, se agrega un estado trampa. 4. Dos situaciones son estados distintos solo si alguna continuación acepta una y rechaza la otra.</span></div>
+  <h4>Situaciones → estados</h4>
+  <div class="dtab"><table class="why"><thead><tr><th>Estado</th><th>Situación que recuerda</th><th>Ejemplo que llega</th></tr></thead><tbody>${p.states.map(st =>
+    `<tr><td class="st">${qn(st.q)}${p.F.includes(st.q) ? ' <span class="acc">acepta</span>' : ''}${st.trap ? ' <span class="trap">trampa</span>' : ''}</td><td class="txt">${st.meaning}</td><td><code>${show(acc[st.q] ?? '—')}</code></td></tr>`).join('')}</tbody></table></div>
+  <h4>¿Por qué no sobra ningún estado?</h4>
+  <p class="note">Para cada par se busca la continuación más corta que da resultados distintos. Si existe, los dos estados no se pueden juntar.</p>
+  ${pairsTable(p)}
+  <p><b>Por eso hacen falta exactamente ${n} estados.</b></p>`;
+}
+
 function buildSteps(p) {
   const s = [];
   s.push({ k: 'intro', t: 'Leer el enunciado', body: `<p>${p.goal}</p><p class="note">Pulsa <b>Siguiente</b> para construir el autómata. En cada paso se agrega una pieza al grafo y a la quíntupla.</p>` });
   s.push({ k: 'sigma', t: 'Fijar el alfabeto Σ', body: `<p><b>Σ = {${p.sigma.join(', ')}}</b>. Toda cadena de entrada se forma solo con estos dos símbolos. Por eso, al final, de cada estado deberá salir una flecha con ${p.sigma[0]} y otra con ${p.sigma[1]}.</p>` });
-  s.push({ k: 'memory', t: 'Decidir qué debe recordar el autómata', body: `<p>${p.memory}</p><p class="note">Un AFD no tiene memoria aparte: lo único que "recuerda" es en qué estado está.</p>` });
+  s.push({ k: 'memory', t: 'Decidir qué debe recordar el autómata', body: `<p>${p.memory}</p><p class="note">Un AFD no tiene memoria aparte: lo único que "recuerda" es en qué estado está.</p>${whyStates(p)}` });
   p.states.forEach((st, i) => s.push({ k: 'state', q: st.q, t: `Agregar el estado ${qn(st.q)}`,
     body: `<p>${st.meaning}</p>` + (i === 0 ? '<p class="note">Es el estado inicial: la flecha que entra sin origen lo marca.</p>' : '') }));
   s.push({ k: 'final', t: 'Marcar los estados de aceptación', body: `<p>${p.finalText}</p>` });
@@ -890,6 +948,7 @@ function renderSections() {
       <div class="sec-cols">
         <div><h4>Interpretación del grafo</h4>
           <ul class="interp">${p.states.map(s => `<li><code>${qn(s.q)}</code>${p.F.includes(s.q) ? ' <span class="acc">aceptación</span>' : ''}${s.q === 'q0' ? ' <span class="ini">inicial</span>' : ''}${s.trap ? ' <span class="trap">trampa</span>' : ''}<span>${s.meaning}</span></li>`).join('')}</ul>
+          <details class="why-d"><summary>¿Por qué ${p.states.length} estados?</summary>${pairsTable(p)}</details>
         </div>
         <div class="sec-res">
           <div class="result"><span class="lbl">Expresión regular</span><code>${p.er}</code></div>
