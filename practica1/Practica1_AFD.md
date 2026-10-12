@@ -11,6 +11,8 @@ En todos los problemas el alfabeto es **Σ = {a, b}**. Para cada uno se da:
 
 En las tablas, `→` marca el estado inicial y `*` los estados de aceptación. En las ER, `+` es la unión, `*` la clausura de Kleene y `ε` la cadena vacía. `|w|ₐ` es el número de símbolos `a` en la cadena `w`.
 
+> Para ver la construcción guiada de cada grafo, abre el [visualizador interactivo](visualizador/index.html) en el navegador.
+
 > Todas las soluciones se comprobaron con [`verificar_afd.py`](verificar_afd.py), que compara el AFD, la ER y la definición del conjunto sobre todas las cadenas de {a, b} de longitud ≤ 12.
 
 ---

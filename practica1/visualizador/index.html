@@ -1,0 +1,577 @@
+<title>AFD Paso a Paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: pizarra de dos columnas — el grafo a la izquierda, la guía paso a paso y la quíntupla a la derecha; una columna en móvil */
+:root {
+  --bg: #F2F5F4;
+  --surface: #FFFFFF;
+  --ink: #17201E;
+  --muted: #5A6762;
+  --line: #CBD5D1;
+  --accent: #1C6984;
+  --accent-soft: #DCEBF1;
+  --active: #B97C00;
+  --active-soft: #FBEFCE;
+  --ok: #2B7A4B;
+  --bad: #B03737;
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101715; --surface: #172120; --ink: #E3ECE8; --muted: #95A49E; --line: #2D3A36;
+    --accent: #62B5D4; --accent-soft: #19343F; --active: #F0B53A; --active-soft: #3A2E10;
+    --ok: #5CC287; --bad: #E47676; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101715; --surface: #172120; --ink: #E3ECE8; --muted: #95A49E; --line: #2D3A36;
+  --accent: #62B5D4; --accent-soft: #19343F; --active: #F0B53A; --active-soft: #3A2E10;
+  --ok: #5CC287; --bad: #E47676; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 40px; display: grid; gap: 20px; }
+header { display: grid; gap: 4px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-size: clamp(26px, 4vw, 36px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--accent); }
+h2 { font-family: var(--display); font-size: 22px; line-height: 1.2; margin: 0; text-wrap: balance; }
+code, .mono { font-family: var(--mono); }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 7px 12px; border-radius: 999px; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+.tab b { font-family: var(--mono); color: var(--muted); font-weight: 600; }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tab[aria-selected="true"] b { color: var(--bg); }
+.tab:focus-visible, .btn:focus-visible, .chip:focus-visible, .steps button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+.board { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
+@media (min-width: 861px) { .board { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); } }
+.board svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); padding-inline: 4px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; }
+.sw.dbl { box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3.5px var(--ink); }
+.sw.new { border-color: var(--accent); background: var(--accent-soft); }
+.sw.act { border-color: var(--active); background: var(--active-soft); }
+
+/* SVG */
+.node circle { fill: var(--surface); stroke: var(--ink); stroke-width: 2; transition: fill .25s, stroke .25s; }
+.node .ring { fill: none; }
+.node text { fill: var(--ink); font-family: var(--mono); font-size: 17px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.node.new circle { stroke: var(--accent); fill: var(--accent-soft); stroke-width: 3; }
+.node.new .ring { fill: none; }
+.node.ringnew .ring { stroke: var(--accent); stroke-width: 3; }
+.node.act circle { stroke: var(--active); fill: var(--active-soft); stroke-width: 3; }
+.node.act .ring { fill: none; }
+.edge path { fill: none; stroke: var(--muted); stroke-width: 1.8; }
+.edge text { fill: var(--ink); font-family: var(--mono); font-size: 15px; font-weight: 600; text-anchor: middle; dominant-baseline: central;
+  paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+.edge.new path { stroke: var(--accent); stroke-width: 2.6; }
+.edge.new text { fill: var(--accent); }
+.edge.used path { stroke: var(--active); stroke-width: 3; }
+.edge.used text { fill: var(--active); }
+.edge.init path { stroke: var(--ink); stroke-width: 2; }
+.edge.init.new path { stroke: var(--accent); }
+.mk-normal { fill: var(--muted); } .mk-new { fill: var(--accent); } .mk-used { fill: var(--active); } .mk-init { fill: var(--ink); }
+.empty-hint { fill: var(--muted); font-family: var(--body); font-size: 15px; text-anchor: middle; }
+@media (prefers-reduced-motion: no-preference) {
+  .node.new circle, .edge.new path { animation: pop .45s ease-out; }
+  @keyframes pop { from { opacity: .2; } to { opacity: 1; } }
+}
+
+.panel { display: grid; gap: 16px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.counter { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; color: var(--muted); }
+.counter .kind { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
+.body { display: grid; gap: 10px; max-width: 62ch; }
+.body p { margin: 0; }
+.note { color: var(--muted); font-size: 14px; }
+.tl { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.tl li { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+.tl code { font-weight: 600; color: var(--accent); }
+.tl span { font-size: 14px; color: var(--muted); }
+.er { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.result { display: grid; gap: 4px; padding: 12px 14px; background: var(--accent-soft); border-radius: 8px; }
+.result .lbl { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.result code { font-size: 16px; overflow-wrap: anywhere; }
+
+.nav { display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+.btn { font: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn:disabled { opacity: .4; cursor: default; }
+.kbd { font-size: 12.5px; color: var(--muted); align-self: center; }
+
+/* Quíntupla */
+.quint h3 { margin: 0; font-family: var(--display); font-size: 17px; }
+.qrow { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 8px; font-family: var(--mono); font-size: 14.5px; align-items: baseline; }
+.qrow .k { color: var(--muted); }
+.qrow .v { overflow-wrap: anywhere; }
+.pending { color: var(--muted); opacity: .6; }
+.hl { background: var(--accent-soft); color: var(--accent); border-radius: 4px; padding: 0 3px; }
+.dtab { overflow-x: auto; }
+table { border-collapse: collapse; font-family: var(--mono); font-size: 14px; min-width: 220px; }
+th, td { border: 1px solid var(--line); padding: 5px 12px; text-align: center; }
+th { color: var(--muted); font-weight: 600; }
+td.st { text-align: left; white-space: nowrap; }
+td.new { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+td.used { background: var(--active-soft); color: var(--active); font-weight: 600; }
+
+/* Simulación */
+.sim { display: grid; gap: 12px; }
+.simin { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.simin label { font-size: 13px; color: var(--muted); width: 100%; }
+.simin input { font: inherit; font-family: var(--mono); font-size: 16px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--ink); flex: 1 1 140px; min-width: 0; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font: inherit; font-family: var(--mono); font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer; }
+.tape { display: flex; gap: 4px; flex-wrap: wrap; min-height: 38px; }
+.cell { width: 34px; height: 38px; display: grid; place-items: center; font-family: var(--mono); font-size: 17px; font-weight: 600;
+  border: 1.5px solid var(--line); border-radius: 6px; }
+.cell.read { color: var(--muted); }
+.cell.cur { border-color: var(--active); background: var(--active-soft); color: var(--active); }
+.cell.eps { width: auto; padding-inline: 10px; color: var(--muted); font-weight: 400; font-size: 14px; }
+.log { font-family: var(--mono); font-size: 13.5px; margin: 0; padding-left: 30px; display: grid; gap: 2px; max-height: 160px; overflow: auto; }
+.verdict { font-weight: 600; padding: 8px 12px; border-radius: 8px; border: 1.5px solid currentColor; }
+.verdict.ok { color: var(--ok); } .verdict.bad { color: var(--bad); } .verdict.wait { color: var(--muted); border-style: dashed; }
+.err { color: var(--bad); font-size: 13px; }
+
+details.steps { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+details.steps summary { cursor: pointer; font-weight: 600; }
+.steps ol { margin: 10px 0 0; padding-left: 26px; display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+.steps button { font: inherit; font-size: 14px; background: none; border: 0; color: var(--ink); cursor: pointer; padding: 2px 4px; text-align: left; border-radius: 4px; }
+.steps li.done button { color: var(--muted); }
+.steps li.cur button { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Teoría de Autómatas · Práctica N° 1 · Universidad de Panamá</span>
+    <h1>Construye el <em>AFD</em> paso a paso</h1>
+  </header>
+
+  <div class="tabs" role="tablist" id="tabs"></div>
+
+  <div class="grid">
+    <div class="board">
+      <svg id="graph" viewBox="0 0 600 400" role="img" aria-label="Diagrama de estados del autómata"></svg>
+      <div class="legend">
+        <span><span class="sw"></span>estado</span>
+        <span><span class="sw dbl"></span>estado de aceptación</span>
+        <span><span class="sw new"></span>agregado en este paso</span>
+        <span><span class="sw act"></span>estado actual al leer</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <section class="card" aria-live="polite">
+        <div class="counter"><span class="kind" id="kind"></span><span id="count"></span></div>
+        <div class="bar"><i id="bar"></i></div>
+        <h2 id="stitle"></h2>
+        <div class="body" id="sbody"></div>
+        <div class="nav">
+          <button class="btn" id="prev">← Anterior</button>
+          <span class="kbd">Teclas ← →</span>
+          <button class="btn primary" id="next">Siguiente →</button>
+        </div>
+      </section>
+
+      <section class="card quint">
+        <h3 id="mname">M = (Q, Σ, δ, q₀, F)</h3>
+        <div class="qrow"><span class="k">Q</span><span class="v" id="qQ"></span></div>
+        <div class="qrow"><span class="k">Σ</span><span class="v" id="qS"></span></div>
+        <div class="qrow"><span class="k">q₀</span><span class="v" id="q0"></span></div>
+        <div class="qrow"><span class="k">F</span><span class="v" id="qF"></span></div>
+        <div class="qrow"><span class="k">δ</span><span class="v dtab" id="qD"></span></div>
+      </section>
+
+      <details class="steps" id="stepsbox" open>
+        <summary>Todos los pasos</summary>
+        <ol id="steplist"></ol>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUB = ['₀','₁','₂','₃','₄','₅'];
+const qn = q => 'q' + SUB[+q.slice(1)];
+
+const PROBLEMS = [
+  {
+    id: 'p1', short: 'Termina en ab',
+    goal: 'Construir un AFD que acepte exactamente las cadenas sobre {a, b} que <b>terminan en "ab"</b>. Por ejemplo: ab, aab, bab, abab.',
+    memory: 'Para saber si la cadena termina en "ab" basta recordar cuánto del sufijo "ab" llevamos al final de lo leído: <b>nada</b>, <b>solo la a</b>, o <b>"ab" completo</b>. Cada situación será un estado, así que necesitamos 3.',
+    states: [
+      { q: 'q0', x: 110, y: 200, loop: -90, init: 180, meaning: 'Lo leído no termina en "a" ni en "ab" (o todavía no se ha leído nada). Todavía no hay avance hacia el sufijo.' },
+      { q: 'q1', x: 300, y: 200, loop: -90, meaning: 'Lo leído termina en "a": ya tenemos la primera mitad del sufijo "ab".' },
+      { q: 'q2', x: 490, y: 200, meaning: 'Lo leído termina en "ab": es justo la situación que queremos aceptar.' },
+    ],
+    F: ['q2'],
+    finalText: 'Solo q₂ significa "termina en ab", así que <b>F = {q₂}</b>. Un estado de aceptación se dibuja con doble círculo.',
+    delta: {
+      q0: { a: ['q1', 'Leer una a nos da el inicio de "ab".'], b: ['q0', 'Una b sin una a antes no ayuda: seguimos sin avance.'] },
+      q1: { a: ['q1', 'Otra a: la cadena sigue terminando en a, y esta nueva a puede iniciar el "ab".'], b: ['q2', 'Después de la a llega la b: se completa "ab".'] },
+      q2: { a: ['q1', 'Tras "ab" llega una a: ya no termina en "ab", pero sí en a.'], b: ['q0', 'Tras "ab" llega una b: termina en "bb" y se pierde todo el avance.'] },
+    },
+    bends: { 'q1>q2': 30, 'q2>q1': 30, 'q2>q0': 125 },
+    check: 'Cada estado tiene exactamente una flecha con a y una con b: 3 estados × 2 símbolos = 6 transiciones. δ está definida para todo par (estado, símbolo), así que el autómata es determinista y completo.',
+    erSteps: ['Al final de la cadena siempre deben aparecer a y luego b.', 'Antes de eso puede venir cualquier cadena: (a + b)*.', 'Concatenando ambas partes: (a + b)*·ab.'],
+    er: '(a + b)*ab',
+    lang: 'L(M₁) = { w ∈ {a, b}* | w = x·ab, x ∈ {a, b}* }',
+    langText: 'Es el conjunto de todas las cadenas que se escriben como un prefijo cualquiera x seguido de ab.',
+    examples: ['bab', 'aab', 'abab', 'ba', 'abb'],
+  },
+  {
+    id: 'p2', short: 'Número par de a',
+    goal: 'Construir un AFD que acepte las cadenas con un <b>número par de a</b> (0, 2, 4, …). Las b pueden aparecer en cualquier cantidad.',
+    memory: 'No hace falta contar todas las a: solo importa si la cantidad leída hasta ahora es <b>par</b> o <b>impar</b>. Son 2 situaciones, así que 2 estados.',
+    states: [
+      { q: 'q0', x: 180, y: 210, loop: -90, init: 180, meaning: 'Se ha leído un número par de a. Al empezar hay 0 a, y 0 es par: por eso q₀ es también el estado inicial.' },
+      { q: 'q1', x: 420, y: 210, loop: -90, meaning: 'Se ha leído un número impar de a.' },
+    ],
+    F: ['q0'],
+    finalText: 'Aceptamos si al terminar la cantidad de a es par: <b>F = {q₀}</b>. Como q₀ es inicial y final a la vez, la cadena vacía ε pertenece al lenguaje.',
+    delta: {
+      q0: { a: ['q1', 'Una a más: de par pasa a impar.'], b: ['q0', 'La b no cambia la cantidad de a.'] },
+      q1: { a: ['q0', 'Una a más: de impar pasa a par.'], b: ['q1', 'La b no cambia la paridad.'] },
+    },
+    bends: { 'q0>q1': 35, 'q1>q0': 35 },
+    check: '2 estados × 2 símbolos = 4 transiciones, todas definidas. Las a cambian de estado y las b son bucles.',
+    erSteps: ['Eliminamos q₁. El camino q₀ →a→ q₁ →b*→ q₁ →a→ q₀ vuelve a q₀ leyendo a b* a.', 'El bucle completo de q₀ queda b + ab*a, así que la ER es (b + ab*a)*.', 'Una forma equivalente es b*(ab*ab*)*: unas b iniciales y luego bloques que contienen exactamente dos a.'],
+    er: 'b*(ab*ab*)*',
+    lang: 'L(M₂) = { w ∈ {a, b}* | |w|ₐ ≡ 0 (mod 2) }',
+    langText: '|w|ₐ es la cantidad de a en w. Incluye ε, b, bb, … porque 0 es par.',
+    examples: ['abab', 'baab', '', 'a', 'aaab'],
+  },
+  {
+    id: 'p3', short: 'Mismo símbolo al inicio y al final',
+    goal: 'Construir un AFD que acepte las cadenas cuyo <b>primer símbolo es igual al último</b>. Las cadenas de un solo símbolo (a, b) cuentan; ε no, porque no tiene primer símbolo.',
+    memory: 'Hay que recordar dos cosas: <b>con qué símbolo empezó</b> la cadena (eso no cambia nunca) y <b>cuál fue el último símbolo</b> leído. Por eso el autómata se divide en dos ramas: la de las cadenas que empiezan con a y la de las que empiezan con b.',
+    states: [
+      { q: 'q0', x: 90, y: 205, init: 180, meaning: 'Todavía no se ha leído nada. Es el estado inicial y no acepta, porque ε no pertenece al lenguaje.' },
+      { q: 'q1', x: 270, y: 105, loop: -90, meaning: 'Empezó con a y el último símbolo leído es a.' },
+      { q: 'q2', x: 480, y: 105, loop: -90, meaning: 'Empezó con a y el último símbolo leído es b.' },
+      { q: 'q3', x: 270, y: 305, loop: 90, meaning: 'Empezó con b y el último símbolo leído es b.' },
+      { q: 'q4', x: 480, y: 305, loop: 90, meaning: 'Empezó con b y el último símbolo leído es a.' },
+    ],
+    F: ['q1', 'q3'],
+    finalText: 'Aceptamos cuando el último símbolo coincide con el primero: q₁ (a…a) y q₃ (b…b). <b>F = {q₁, q₃}</b>.',
+    delta: {
+      q0: { a: ['q1', 'El primer símbolo es a: entramos a la rama de a. Primero y último coinciden.'], b: ['q3', 'El primer símbolo es b: entramos a la rama de b.'] },
+      q1: { a: ['q1', 'Sigue terminando en a.'], b: ['q2', 'Ahora termina en b, distinto del primer símbolo.'] },
+      q2: { a: ['q1', 'Vuelve a terminar en a.'], b: ['q2', 'Sigue terminando en b.'] },
+      q3: { a: ['q4', 'Ahora termina en a, distinto del primer símbolo.'], b: ['q3', 'Sigue terminando en b.'] },
+      q4: { a: ['q4', 'Sigue terminando en a.'], b: ['q3', 'Vuelve a terminar en b.'] },
+    },
+    bends: { 'q1>q2': 28, 'q2>q1': 28, 'q3>q4': 28, 'q4>q3': 28 },
+    check: '5 estados × 2 símbolos = 10 transiciones. Ninguna flecha regresa a q₀ ni cruza de una rama a la otra: el primer símbolo queda grabado en la rama.',
+    erSteps: ['Cadenas de un solo símbolo: a + b.', 'Rama de a: empieza con a, termina con a, y en medio cualquier cosa: a(a + b)*a.', 'Rama de b: b(a + b)*b.', 'Unimos los tres casos.'],
+    er: 'a + b + a(a + b)*a + b(a + b)*b',
+    lang: 'L(M₃) = { w ∈ {a, b}⁺ | el primer símbolo de w es igual al último }',
+    langText: '{a, b}⁺ son las cadenas no vacías. Equivale a: w = σ o w = σxσ, con σ ∈ {a, b} y x ∈ {a, b}*.',
+    examples: ['aba', 'bbab', 'a', 'ab', 'abab'],
+  },
+  {
+    id: 'p4', short: 'Número de b múltiplo de 3',
+    goal: 'Construir un AFD que acepte las cadenas cuyo <b>número de b es múltiplo de 3</b> (0, 3, 6, …). Las a pueden aparecer en cualquier cantidad.',
+    memory: 'Solo importa el <b>resto</b> de dividir la cantidad de b entre 3: puede ser 0, 1 o 2. Son 3 estados que forman un ciclo.',
+    states: [
+      { q: 'q0', x: 140, y: 290, loop: 90, init: 180, meaning: 'Cantidad de b ≡ 0 (mod 3). Al empezar hay 0 b, y 0 es múltiplo de 3.' },
+      { q: 'q1', x: 300, y: 100, loop: -90, meaning: 'Cantidad de b ≡ 1 (mod 3).' },
+      { q: 'q2', x: 460, y: 290, loop: 90, meaning: 'Cantidad de b ≡ 2 (mod 3).' },
+    ],
+    F: ['q0'],
+    finalText: '<b>F = {q₀}</b>. Como q₀ también es inicial, se aceptan ε y las cadenas formadas solo por a.',
+    delta: {
+      q0: { a: ['q0', 'La a no cambia la cuenta de b.'], b: ['q1', 'Una b más: el resto pasa a 1.'] },
+      q1: { a: ['q1', 'La a no cambia la cuenta de b.'], b: ['q2', 'Una b más: el resto pasa a 2.'] },
+      q2: { a: ['q2', 'La a no cambia la cuenta de b.'], b: ['q0', 'Tercera b: el resto vuelve a 0.'] },
+    },
+    bends: {},
+    check: '3 × 2 = 6 transiciones. Las a son bucles y las b recorren el ciclo q₀ → q₁ → q₂ → q₀.',
+    erSteps: ['Una vuelta completa al ciclo lee b a* b a* b (con a sueltas en medio).', 'Al eliminar q₁ y q₂, el bucle de q₀ queda a + ba*ba*b, y la ER es (a + ba*ba*b)*.', 'Una forma equivalente es a*(ba*ba*ba*)*.'],
+    er: 'a*(ba*ba*ba*)*',
+    lang: 'L(M₄) = { w ∈ {a, b}* | |w|_b ≡ 0 (mod 3) }',
+    langText: '|w|_b es la cantidad de b en w. Incluye ε y todas las cadenas formadas solo por a.',
+    examples: ['bbb', 'ababab', 'aa', 'bb', 'bbbb'],
+  },
+  {
+    id: 'p5', short: 'No contiene bb',
+    goal: 'Construir un AFD que acepte las cadenas que <b>no contienen la subcadena "bb"</b>, es decir, que nunca tienen dos b seguidas.',
+    memory: 'Hay que recordar si el <b>último símbolo fue b</b> (porque otra b formaría "bb") y si <b>ya apareció "bb"</b> (en ese caso no hay vuelta atrás). Son 3 estados, y uno de ellos es un estado sumidero.',
+    states: [
+      { q: 'q0', x: 110, y: 210, loop: -90, init: 180, meaning: 'No ha aparecido "bb" y el último símbolo no es b (o aún no se ha leído nada).' },
+      { q: 'q1', x: 300, y: 210, meaning: 'No ha aparecido "bb", pero el último símbolo es b: si llega otra b, se forma "bb".' },
+      { q: 'q2', x: 490, y: 210, loop: -90, meaning: 'Ya apareció "bb". Es un estado sumidero (trampa): ninguna entrada lo saca de aquí.' },
+    ],
+    F: ['q0', 'q1'],
+    finalText: 'Aceptamos mientras no haya aparecido "bb": <b>F = {q₀, q₁}</b>. q₂ no es de aceptación.',
+    delta: {
+      q0: { a: ['q0', 'La a no genera peligro.'], b: ['q1', 'Una b: si viene otra, se forma "bb".'] },
+      q1: { a: ['q0', 'La a corta la racha de b: volvemos a estar a salvo.'], b: ['q2', 'Segunda b seguida: apareció "bb".'] },
+      q2: { a: ['q2', 'Una vez que apareció "bb", nada lo borra.'], b: ['q2', 'Una vez que apareció "bb", nada lo borra.'] },
+    },
+    bends: { 'q0>q1': 30, 'q1>q0': 30 },
+    check: '3 × 2 = 6 transiciones. El estado sumidero q₂ hace que δ sea total: sin él faltaría δ(q₁, b).',
+    erSteps: ['Ignoramos q₂: desde él no se llega a ningún estado de aceptación.', 'Desde q₀ se puede leer a, o b seguida de a (ir a q₁ y volver): el bucle es (a + ba)*.', 'Se puede terminar en q₀ (no se lee nada más: ε) o en q₁ (una b final): (ε + b).', 'Concatenamos las dos partes.'],
+    er: '(a + ba)*(ε + b)',
+    lang: 'L(M₅) = { w ∈ {a, b}* | bb no es subcadena de w }',
+    langText: 'Equivale a decir que no existen x, y ∈ {a, b}* tales que w = x·bb·y.',
+    examples: ['abab', 'bab', '', 'abba', 'bb'],
+  },
+];
+
+const KIND = { intro: 'Enunciado', sigma: 'Alfabeto', memory: 'Idea', state: 'Estados', final: 'Aceptación', trans: 'Transiciones', check: 'Verificación', sim: 'Simulación', er: 'Expresión regular', lang: 'Lenguaje' };
+
+function buildSteps(p) {
+  const s = [];
+  s.push({ k: 'intro', t: 'Leer el enunciado', body: `<p>${p.goal}</p><p class="note">Pulsa <b>Siguiente</b> para construir el autómata. En cada paso se agrega una pieza al grafo y a la quíntupla.</p>` });
+  s.push({ k: 'sigma', t: 'Fijar el alfabeto Σ', body: '<p><b>Σ = {a, b}</b>. Toda cadena de entrada se forma solo con estos dos símbolos. Por eso, al final, de cada estado deberá salir una flecha con a y otra con b.</p>' });
+  s.push({ k: 'memory', t: 'Decidir qué debe recordar el autómata', body: `<p>${p.memory}</p><p class="note">Un AFD no tiene memoria aparte: lo único que "recuerda" es en qué estado está.</p>` });
+  p.states.forEach((st, i) => s.push({ k: 'state', q: st.q, t: `Agregar el estado ${qn(st.q)}`,
+    body: `<p>${st.meaning}</p>` + (i === 0 ? '<p class="note">Es el estado inicial: la flecha que entra sin origen lo marca.</p>' : '') }));
+  s.push({ k: 'final', t: 'Marcar los estados de aceptación', body: `<p>${p.finalText}</p>` });
+  p.states.forEach(st => s.push({ k: 'trans', q: st.q, t: `Conectar las transiciones desde ${qn(st.q)}`,
+    body: '<ul class="tl">' + ['a', 'b'].map(x => { const [to, why] = p.delta[st.q][x];
+      return `<li><code>δ(${qn(st.q)}, ${x}) = ${qn(to)}</code><span>${why}</span></li>`; }).join('') + '</ul>' }));
+  s.push({ k: 'check', t: 'Comprobar que δ está completa', body: `<p>${p.check}</p>` });
+  s.push({ k: 'sim', t: 'Probar cadenas en el autómata', body: '' });
+  s.push({ k: 'er', t: 'Obtener la expresión regular', body: '<ol class="er">' + p.erSteps.map(x => `<li>${x}</li>`).join('') + `</ol><div class="result"><span class="lbl">Expresión regular</span><code>${p.er}</code></div>` });
+  s.push({ k: 'lang', t: 'Escribir el lenguaje regular', body: `<div class="result"><span class="lbl">Lenguaje</span><code>${p.lang}</code></div><p>${p.langText}</p><p class="note">El autómata, la expresión regular y este conjunto describen el mismo lenguaje.</p>` });
+  return s;
+}
+
+let P, steps, idx = 0, at, sim = null, timer = null;
+const $ = id => document.getElementById(id);
+
+function selectProblem(i, keepStep) {
+  P = PROBLEMS[i];
+  steps = buildSteps(P);
+  at = { added: {}, trans: {} };
+  steps.forEach((s, j) => {
+    if (s.k === 'state') at.added[s.q] = j;
+    if (s.k === 'trans') at.trans[s.q] = j;
+    if (s.k === 'sigma') at.sigma = j;
+    if (s.k === 'final') at.final = j;
+  });
+  if (!keepStep) idx = 0;
+  document.querySelectorAll('.tab').forEach((t, j) => t.setAttribute('aria-selected', j === i ? 'true' : 'false'));
+  $('mname').textContent = `M${SUB[i + 1]} = (Q, Σ, δ, q₀, F)`;
+  try { history.replaceState(null, '', '#' + P.id); } catch (e) {}
+  showStep();
+}
+
+function showStep() {
+  stopRun();
+  const s = steps[idx];
+  $('kind').textContent = KIND[s.k];
+  $('count').textContent = `Paso ${idx + 1} de ${steps.length}`;
+  $('bar').style.width = ((idx + 1) / steps.length * 100) + '%';
+  $('stitle').textContent = s.t;
+  $('prev').disabled = idx === 0;
+  $('next').disabled = idx === steps.length - 1;
+  if (s.k === 'sim') { $('sbody').innerHTML = simShell(); bindSim(); simReset(P.examples[0]); }
+  else { sim = null; $('sbody').innerHTML = s.body; }
+  renderList();
+  draw();
+}
+
+/* ---------- grafo ---------- */
+const R = 28;
+const unit = (dx, dy) => { const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+const f = n => n.toFixed(1);
+
+function draw() {
+  const st = Object.fromEntries(P.states.map(s => [s.q, s]));
+  const vis = q => at.added[q] <= idx;
+  const finalsOn = at.final <= idx;
+  const out = [];
+  out.push(`<defs>${['normal', 'new', 'used', 'init'].map(c =>
+    `<marker id="ar-${c}" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-${c}" d="M0,0 L10,5 L0,10 z"/></marker>`).join('')}</defs>`);
+
+  if (!P.states.some(s => vis(s.q))) {
+    out.push(`<text class="empty-hint" x="300" y="200">El grafo aparecerá aquí a medida que avances.</text>`);
+  }
+
+  // aristas agrupadas por (origen, destino)
+  const groups = {};
+  P.states.forEach(s => ['a', 'b'].forEach(x => {
+    const to = P.delta[s.q][x][0], key = s.q + '>' + to;
+    (groups[key] = groups[key] || { from: s.q, to, syms: [] }).syms.push(x);
+  }));
+  const usedKey = sim && sim.lastEdge;
+  Object.entries(groups).forEach(([key, g]) => {
+    if (!(at.trans[g.from] <= idx)) return;
+    const cls = key === usedKey ? 'used' : (at.trans[g.from] === idx ? 'new' : 'normal');
+    const A = st[g.from], B = st[g.to], label = g.syms.join(', ');
+    let d, lx, ly;
+    if (g.from === g.to) {
+      const th = (A.loop ?? -90) * Math.PI / 180;
+      const p = a => [A.x + R * Math.cos(a), A.y + R * Math.sin(a)];
+      const c = a => [A.x + 82 * Math.cos(a), A.y + 82 * Math.sin(a)];
+      const [p1, p2, c1, c2] = [p(th - .45), p(th + .45), c(th - .5), c(th + .5)];
+      d = `M${f(p1[0])},${f(p1[1])} C${f(c1[0])},${f(c1[1])} ${f(c2[0])},${f(c2[1])} ${f(p2[0])},${f(p2[1])}`;
+      lx = A.x + 76 * Math.cos(th); ly = A.y + 76 * Math.sin(th);
+    } else {
+      const bend = P.bends[key] || 0;
+      const [ux, uy] = unit(B.x - A.x, B.y - A.y);
+      const nx = uy, ny = -ux;
+      const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+      const C = [mx + nx * bend, my + ny * bend];
+      const [sx, sy] = unit(C[0] - A.x, C[1] - A.y), [ex, ey] = unit(C[0] - B.x, C[1] - B.y);
+      const S = [A.x + sx * R, A.y + sy * R], E = [B.x + ex * R, B.y + ey * R];
+      d = `M${f(S[0])},${f(S[1])} Q${f(C[0])},${f(C[1])} ${f(E[0])},${f(E[1])}`;
+      const hx = .25 * S[0] + .5 * C[0] + .25 * E[0], hy = .25 * S[1] + .5 * C[1] + .25 * E[1];
+      lx = hx + nx * 13; ly = hy + ny * 13;
+    }
+    out.push(`<g class="edge ${cls}"><path d="${d}" marker-end="url(#ar-${cls})"/><text x="${f(lx)}" y="${f(ly)}">${label}</text></g>`);
+  });
+
+  // flecha de estado inicial
+  const q0 = P.states[0];
+  if (vis(q0.q)) {
+    const th = q0.init * Math.PI / 180;
+    const cls = at.added[q0.q] === idx ? 'init new' : 'init';
+    out.push(`<g class="edge ${cls}"><path d="M${f(q0.x + 66 * Math.cos(th))},${f(q0.y + 66 * Math.sin(th))} L${f(q0.x + R * Math.cos(th))},${f(q0.y + R * Math.sin(th))}" marker-end="url(#ar-${at.added[q0.q] === idx ? 'new' : 'init'})"/></g>`);
+  }
+
+  // nodos
+  P.states.forEach(s => {
+    if (!vis(s.q)) return;
+    const isF = finalsOn && P.F.includes(s.q);
+    let cls = 'node';
+    if (sim && sim.q === s.q) cls += ' act';
+    else if (at.added[s.q] === idx) cls += ' new';
+    if (isF && at.final === idx) cls += ' ringnew';
+    out.push(`<g class="${cls}"><circle cx="${s.x}" cy="${s.y}" r="${R}"/>${isF ? `<circle class="ring" cx="${s.x}" cy="${s.y}" r="${R - 5}"/>` : ''}<text x="${s.x}" y="${s.y}">${qn(s.q)}</text></g>`);
+  });
+  $('graph').innerHTML = out.join('');
+  drawQuint();
+}
+
+function drawQuint() {
+  const visQ = P.states.filter(s => at.added[s.q] <= idx).map(s => s.q);
+  const pend = '<span class="pending">pendiente</span>';
+  const hlIf = (txt, on) => on ? `<span class="hl">${txt}</span>` : txt;
+  $('qQ').innerHTML = visQ.length ? '{ ' + visQ.map(q => hlIf(qn(q), at.added[q] === idx)).join(', ') + ' }' : pend;
+  $('qS').innerHTML = at.sigma <= idx ? hlIf('{ a, b }', at.sigma === idx) : pend;
+  $('q0').innerHTML = at.added.q0 <= idx ? hlIf('q₀', at.added.q0 === idx) : pend;
+  $('qF').innerHTML = at.final <= idx ? hlIf('{ ' + P.F.map(qn).join(', ') + ' }', at.final === idx) : pend;
+  if (!visQ.length) { $('qD').innerHTML = pend; return; }
+  const usedCell = sim && sim.lastCell;
+  let h = '<table><thead><tr><th>δ</th><th>a</th><th>b</th></tr></thead><tbody>';
+  visQ.forEach(q => {
+    const mark = (q === 'q0' ? '→ ' : '') + (at.final <= idx && P.F.includes(q) ? '* ' : '');
+    h += `<tr><td class="st">${mark}${qn(q)}</td>`;
+    ['a', 'b'].forEach(x => {
+      const done = at.trans[q] <= idx;
+      const c = usedCell === q + x ? 'used' : (at.trans[q] === idx ? 'new' : '');
+      h += `<td class="${c}">${done ? qn(P.delta[q][x][0]) : '<span class="pending">—</span>'}</td>`;
+    });
+    h += '</tr>';
+  });
+  $('qD').innerHTML = h + '</tbody></table>';
+}
+
+/* ---------- simulación ---------- */
+function simShell() {
+  return `<p>Escribe una cadena (o elige un ejemplo) y léela símbolo por símbolo. El estado actual se ilumina en el grafo y la flecha usada se resalta.</p>
+  <div class="sim">
+    <div class="simin"><label for="cadena">Cadena de entrada (solo a y b; vacía = ε)</label>
+      <input id="cadena" autocomplete="off" spellcheck="false" maxlength="20">
+      <button class="btn" id="sreset">Reiniciar</button></div>
+    <div class="chips">${P.examples.map(e => `<button class="chip" data-w="${e}">${e || 'ε'}</button>`).join('')}</div>
+    <div class="tape" id="tape"></div>
+    <div class="nav"><button class="btn primary" id="sstep">Leer símbolo</button><button class="btn" id="sall">Leer todo</button></div>
+    <div id="verdict"></div>
+    <ol class="log" id="slog"></ol>
+  </div>`;
+}
+function bindSim() {
+  $('cadena').addEventListener('input', e => simReset(e.target.value, true));
+  $('sreset').addEventListener('click', () => simReset($('cadena').value));
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => simReset(c.dataset.w)));
+  $('sstep').addEventListener('click', () => { stopRun(); simStep(); });
+  $('sall').addEventListener('click', runAll);
+}
+function simReset(w, fromInput) {
+  stopRun();
+  if (!fromInput) $('cadena').value = w;
+  const bad = /[^ab]/.test(w);
+  sim = { w: bad ? '' : w, bad, i: 0, q: 'q0', log: [], lastEdge: null, lastCell: null };
+  updateSim();
+}
+function simStep() {
+  if (!sim || sim.bad || sim.i >= sim.w.length) return;
+  const x = sim.w[sim.i], to = P.delta[sim.q][x][0];
+  sim.log.push(`δ(${qn(sim.q)}, ${x}) = ${qn(to)}`);
+  sim.lastEdge = sim.q + '>' + to; sim.lastCell = sim.q + x;
+  sim.q = to; sim.i++;
+  updateSim();
+}
+function runAll() {
+  stopRun();
+  if (!sim || sim.bad) return;
+  if (sim.i >= sim.w.length) simReset(sim.w);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { while (sim.i < sim.w.length) simStep(); return; }
+  timer = setInterval(() => { if (!sim || sim.i >= sim.w.length) return stopRun(); simStep(); }, 700);
+}
+function stopRun() { if (timer) { clearInterval(timer); timer = null; } }
+function updateSim() {
+  const tape = $('tape');
+  if (sim.bad) {
+    tape.innerHTML = '<span class="err">La cadena solo puede contener los símbolos a y b.</span>';
+  } else if (!sim.w.length) {
+    tape.innerHTML = '<span class="cell eps">ε (cadena vacía)</span>';
+  } else {
+    tape.innerHTML = [...sim.w].map((x, j) => `<span class="cell ${j < sim.i ? 'read' : ''} ${j === sim.i ? 'cur' : ''}">${x}</span>`).join('');
+  }
+  $('slog').innerHTML = sim.log.map(l => `<li>${l}</li>`).join('');
+  const done = !sim.bad && sim.i >= sim.w.length;
+  $('sstep').disabled = sim.bad || done;
+  let v = '';
+  if (sim.bad) v = '';
+  else if (done) {
+    const ok = P.F.includes(sim.q);
+    v = `<div class="verdict ${ok ? 'ok' : 'bad'}">${ok ? 'ACEPTADA' : 'RECHAZADA'}: termina en ${qn(sim.q)}, que ${ok ? 'sí' : 'no'} pertenece a F = {${P.F.map(qn).join(', ')}}.</div>`;
+  } else v = `<div class="verdict wait">Estado actual: ${qn(sim.q)}. Faltan ${sim.w.length - sim.i} símbolo(s).</div>`;
+  $('verdict').innerHTML = v;
+  draw();
+}
+
+/* ---------- navegación ---------- */
+function renderList() {
+  $('steplist').innerHTML = steps.map((s, j) =>
+    `<li class="${j < idx ? 'done' : ''} ${j === idx ? 'cur' : ''}"><button data-j="${j}">${s.t}</button></li>`).join('');
+  $('steplist').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { idx = +b.dataset.j; showStep(); }));
+}
+function go(d) { const n = idx + d; if (n >= 0 && n < steps.length) { idx = n; showStep(); } }
+$('prev').addEventListener('click', () => go(-1));
+$('next').addEventListener('click', () => go(1));
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea')) return;
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+});
+
+$('tabs').innerHTML = PROBLEMS.map((p, i) =>
+  `<button class="tab" role="tab" aria-selected="false" data-i="${i}"><b>${i + 1}</b>${p.short}</button>`).join('');
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => selectProblem(+t.dataset.i)));
+if (matchMedia('(max-width: 860px)').matches) $('stepsbox').removeAttribute('open');
+
+const start = Math.max(0, PROBLEMS.findIndex(p => '#' + p.id === location.hash));
+selectProblem(start);
+</script>
