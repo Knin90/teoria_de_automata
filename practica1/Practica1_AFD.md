@@ -1,5 +1,7 @@
 # Práctica N° 1 – Autómatas Finitos Deterministas (AFD)
 
+**Tema general:** Teoría de Autómatas y Lenguajes Formales, con enfoque en los Autómatas Finitos Deterministas (AFD).
+
 **Universidad de Panamá** · Facultad de Informática, Electrónica y Comunicación
 Departamento de Computación y Sistemas · Teoría de Autómatas y Lenguajes Formales
 
@@ -18,6 +20,9 @@ En las tablas, `→` marca el estado inicial y `*` los estados de aceptación. E
 ---
 
 ## Problema 1 – Cadenas que terminan en "ab"
+
+**Tema:** Reconocimiento de un sufijo específico ("ab").  
+**Concepto:** Reconocimiento de patrones al final
 
 ### Quíntupla
 
@@ -66,6 +71,9 @@ Ejemplos: aceptadas `ab`, `aab`, `bab`, `abab`; rechazadas `ε`, `a`, `ba`, `abb
 
 ## Problema 2 – Número par de símbolos "a"
 
+**Tema:** Contar la paridad (par o impar) de un símbolo. Es un contador módulo 2 de las `a`; las `b` no cambian el estado.  
+**Concepto:** Contador módulo 2
+
 ### Quíntupla
 
 M₂ = (Q, Σ, δ, q₀, F)
@@ -109,7 +117,10 @@ Ejemplos: aceptadas `ε`, `b`, `aa`, `abab`, `baab`; rechazadas `a`, `ab`, `aaa`
 
 ## Problema 3 – Cadenas que empiezan y terminan con el mismo símbolo
 
-> Se considera que la cadena vacía ε **no** pertenece al lenguaje, porque no tiene primer ni último símbolo. Las cadenas de un solo símbolo (`a`, `b`) sí pertenecen, ya que empiezan y terminan con el mismo símbolo.
+**Tema:** Cadenas de al menos dos símbolos que comienzan y terminan con el mismo carácter.  
+**Concepto:** Memoria del primer símbolo
+
+> Según el grafo de la práctica, el primer y el último símbolo deben ser posiciones distintas: la cadena tiene **al menos dos símbolos**. Por eso `ε`, `a` y `b` se rechazan.
 
 ### Quíntupla
 
@@ -118,58 +129,59 @@ M₃ = (Q, Σ, δ, q₀, F)
 - Q = {q₀, q₁, q₂, q₃, q₄}
 - Σ = {a, b}
 - q₀ = q₀
-- F = {q₁, q₃}
+- F = {q₃, q₄}
 
 | δ       | a  | b  |
 |---------|----|----|
-| → q₀    | q₁ | q₃ |
-| \* q₁   | q₁ | q₂ |
-| q₂      | q₁ | q₂ |
-| \* q₃   | q₄ | q₃ |
-| q₄      | q₄ | q₃ |
+| → q₀    | q₁ | q₂ |
+| q₁      | q₃ | q₁ |
+| q₂      | q₂ | q₄ |
+| \* q₃   | q₃ | q₁ |
+| \* q₄   | q₂ | q₄ |
 
 ```mermaid
 stateDiagram-v2
     direction LR
     [*] --> q0
     q0 --> q1 : a
-    q0 --> q3 : b
-    q1 --> q1 : a
-    q1 --> q2 : b
-    q2 --> q1 : a
-    q2 --> q2 : b
-    q3 --> q3 : b
-    q3 --> q4 : a
-    q4 --> q4 : a
-    q4 --> q3 : b
-    q1 --> [*]
+    q0 --> q2 : b
+    q1 --> q3 : a
+    q1 --> q1 : b
+    q2 --> q2 : a
+    q2 --> q4 : b
+    q3 --> q3 : a
+    q3 --> q1 : b
+    q4 --> q2 : a
+    q4 --> q4 : b
     q3 --> [*]
+    q4 --> [*]
 ```
 
-**Significado de los estados:**
+**Interpretación del grafo:** el autómata se divide en dos ramas según el primer símbolo leído (rama de `a`: q₁, q₃; rama de `b`: q₂, q₄) y solo acepta cuando el último símbolo coincide con el primero.
 - q₀: no se ha leído nada.
-- q₁: empezó con `a` y el último símbolo es `a` → acepta.
-- q₂: empezó con `a` y el último símbolo es `b`.
-- q₃: empezó con `b` y el último símbolo es `b` → acepta.
-- q₄: empezó con `b` y el último símbolo es `a`.
+- q₁: empezó con `a` y todavía no termina en otra `a` (se leyó solo la primera `a`, o el último símbolo es `b`).
+- q₂: empezó con `b` y todavía no termina en otra `b`.
+- q₃: empezó con `a` y termina en `a` → acepta.
+- q₄: empezó con `b` y termina en `b` → acepta.
 
 ### Expresión regular
 
-**ER = a + b + a(a + b)\*a + b(a + b)\*b**
-
-(forma equivalente: a(ε + (a + b)\*a) + b(ε + (a + b)\*b))
+**ER = a(a + b)\*a + b(a + b)\*b**
 
 ### Lenguaje
 
-**L(M₃) = { w ∈ {a, b}⁺ | w = σxσ ó w = σ, con σ ∈ {a, b}, x ∈ {a, b}\* }**
+**L(M₃) = { w ∈ {a, b}\* | |w| ≥ 2 y el primer símbolo de w es igual al último }** = { σxσ | σ ∈ {a, b}, x ∈ {a, b}\* }
 
-Es decir, las cadenas no vacías cuyo primer símbolo es igual al último.
+Ejemplos: aceptadas `aa`, `bb`, `aba`, `bab`, `bbab`; rechazadas `ε`, `a`, `b`, `ab`, `abab`.
 
-Ejemplos: aceptadas `a`, `b`, `aa`, `aba`, `bab`, `bbab`; rechazadas `ε`, `ab`, `ba`, `abab`.
+> Si se quisiera aceptar también `a` y `b` sueltas, la ER sería a + b + a(a + b)\*a + b(a + b)\*b y el autómata necesitaría otros estados.
 
 ---
 
 ## Problema 4 – Número de "b" múltiplo de 3
+
+**Tema:** Contar un símbolo módulo 3 (residuos 0, 1 y 2). Es un contador cíclico de las `b`; las `a` no afectan el conteo.  
+**Concepto:** Contador módulo 3
 
 ### Quíntupla
 
@@ -214,6 +226,9 @@ Ejemplos: aceptadas `ε`, `aa`, `bbb`, `ababab`, `bbbbbb`; rechazadas `b`, `bb`,
 ---
 
 ## Problema 5 – Cadenas que no contienen la subcadena "bb"
+
+**Tema:** Lenguajes que **evitan** un patrón prohibido (la subcadena "bb").  
+**Concepto:** Estado trampa / rechazo irreversible
 
 ### Quíntupla
 
@@ -262,15 +277,15 @@ Ejemplos: aceptadas `ε`, `b`, `ab`, `bab`, `abaab`; rechazadas `bb`, `abb`, `ab
 
 ---
 
-## Resumen
+## Resumen de temas tratados
 
-| # | Lenguaje | \|Q\| | F | Expresión regular |
-|---|----------|-------|---|-------------------|
-| 1 | Termina en `ab` | 3 | {q₂} | (a + b)\*ab |
-| 2 | Número par de `a` | 2 | {q₀} | b\*(ab\*ab\*)\* |
-| 3 | Empieza y termina con el mismo símbolo | 5 | {q₁, q₃} | a + b + a(a + b)\*a + b(a + b)\*b |
-| 4 | Número de `b` múltiplo de 3 | 3 | {q₀} | a\*(ba\*ba\*ba\*)\* |
-| 5 | No contiene `bb` | 3 | {q₀, q₁} | (a + ba)\*(ε + b) |
+| # | Problema | Tema principal | Concepto de teoría de autómatas | \|Q\| | F | Expresión regular |
+|---|----------|----------------|---------------------------------|-------|---|-------------------|
+| 1 | Termina en `ab` | Sufijo específico | Reconocimiento de patrones al final | 3 | {q₂} | (a + b)\*ab |
+| 2 | Número par de `a` | Paridad de un símbolo | Contador módulo 2 | 2 | {q₀} | b\*(ab\*ab\*)\* |
+| 3 | Mismo símbolo al inicio y al final | Mismo símbolo al inicio y al final | Memoria del primer símbolo | 5 | {q₃, q₄} | a(a + b)\*a + b(a + b)\*b |
+| 4 | Número de `b` múltiplo de 3 | Múltiplo de 3 de un símbolo | Contador módulo 3 | 3 | {q₀} | a\*(ba\*ba\*ba\*)\* |
+| 5 | No contiene `bb` | Evitar una subcadena | Estado trampa / rechazo irreversible | 3 | {q₀, q₁} | (a + ba)\*(ε + b) |
 
 ## Cómo verificar
 
