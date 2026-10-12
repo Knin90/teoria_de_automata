@@ -208,6 +208,66 @@ table.sum a, .sec a { color: var(--accent); }
 .prac[aria-selected="true"] span { color: var(--accent); }
 .prac:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .trap { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 1px 8px; border: 1px solid currentColor; color: var(--bad); }
+.method { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 14px; display: grid; gap: 4px; }
+.body h4 { margin: 6px 0 0; font-family: var(--display); font-size: 16px; }
+table.why { font-family: var(--body); font-size: 13.5px; min-width: 440px; }
+table.why th, table.why td { text-align: left; vertical-align: top; }
+table.why td.txt { min-width: 200px; }
+table.why code { white-space: nowrap; }
+.ok { color: var(--ok); font-weight: 600; } .no { color: var(--bad); font-weight: 600; }
+details.why-d { margin-top: 12px; }
+details.why-d summary { cursor: pointer; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+/* Clase desde cero */
+.lesson { gap: 22px; }
+.lesson .lead { margin: 4px 0 0; max-width: 70ch; }
+.exbox { display: grid; gap: 6px; margin-top: 6px; }
+.lbl { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.exlist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.paso { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid var(--line); min-width: 0; }
+.paso > p { margin: 0; max-width: 70ch; }
+.paso h4 { margin: 0; font-family: var(--display); font-size: 19px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.paso h5 { margin: 0; font-family: var(--display); font-size: 16px; }
+.pn { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 10px; }
+.concepts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cpt { display: grid; gap: 4px; align-content: start; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--bg); }
+.cpt .sym { font-family: var(--display); font-size: 26px; line-height: 1; color: var(--accent); }
+.cpt > span:last-child { font-size: 14px; color: var(--muted); }
+.key { border-left: 3px solid var(--accent); padding: 8px 12px; background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+.slist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.slist li { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.slist li > span:last-child { flex-basis: 100%; color: var(--muted); font-size: 14px; }
+.scards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.scard { display: grid; gap: 4px; align-content: start; border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.scard.fin { border-color: var(--ok); box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4.5px var(--ok); }
+.scard.trp { border-style: dashed; border-color: var(--bad); }
+.qbig { font-family: var(--mono); font-size: 24px; font-weight: 600; }
+.insight { border: 1px solid var(--active); background: var(--active-soft); border-radius: 8px; padding: 10px 14px; }
+.caso { display: grid; gap: 8px; }
+.tcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.tcard { display: grid; gap: 4px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14px; align-content: start; }
+.tcard .mv { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; }
+.tcard .arr { font-family: var(--mono); color: var(--accent); font-size: 14px; }
+.tcard .rd { color: var(--muted); }
+.formula { justify-self: start; margin-top: 4px; padding: 3px 10px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.guide { margin: 0; padding-left: 20px; display: grid; gap: 4px; max-width: 75ch; }
+.punto { display: grid; gap: 8px; }
+.punto p { margin: 0; }
+.quint5, .parts { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.quint5 li, .parts li { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: 4px 14px; align-items: baseline; }
+.quint5 code, .parts code { font-weight: 600; overflow-wrap: anywhere; }
+.quint5 span, .parts span { color: var(--muted); font-size: 14px; }
+@media (max-width: 520px) { .quint5 li, .parts li { grid-template-columns: minmax(0, 1fr); } }
+.erbig { justify-self: start; border: 2px solid var(--accent); border-radius: 10px; padding: 10px 18px; font-size: 20px; overflow-wrap: anywhere; max-width: 100%; }
+.trace { display: grid; gap: 10px; }
+.tline { display: flex; gap: 10px; align-items: baseline; }
+.tpath { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tq { font-family: var(--mono); font-weight: 600; padding: 4px 10px; border: 1.5px solid var(--line); border-radius: 999px; }
+.tpath .tq:last-child { border-color: var(--active); background: var(--active-soft); color: var(--active); }
+.tarr { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.final-idea { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 12px 16px; }
+.lesson > .btn { justify-self: start; }
+.lesson .board.static { max-width: 620px; width: 100%; }
 </style>
 
 <div class="wrap">
@@ -701,13 +761,97 @@ const PRACTICAS = [
 ];
 let PR = PRACTICAS[0], PROBLEMS = PR.problems;
 
+/* ---------- datos de la clase: error típico y partes de la ER ---------- */
+const LECCION = {
+  n1: { insight: 'q₁ no significa que la cadena contenga una b en cualquier parte: significa que el <b>último</b> símbolo leído es b. En ba, después de leer la b estamos en q₁, pero la a final nos devuelve a q₀.',
+        erParts: [['(a|b)', 'se elige a o b'], ['*', 'esa elección se repite cero o más veces: cualquier cadena, incluso ε'], ['b', 'la b final obliga a que la cadena termine en b']] },
+  n2: { insight: 'El 0 solo puede aparecer una vez y solo al principio. Un 0 en cualquier otra posición lleva al estado trampa q₃, del que ya no se sale.',
+        erParts: [['0?', 'el 0 es opcional: aparece cero o una vez'], ['1+', 'uno o más 1: al menos un 1 es obligatorio']] },
+  n3: { insight: 'q₁ es absorbente: en cuanto aparece la primera a, la cadena queda aceptada sin importar lo que venga después. Por eso las dos flechas de q₁ vuelven a q₁.',
+        erParts: [['b*', 'cero o más b antes de la primera a'], ['a', 'la primera a, obligatoria'], ['(a|b)*', 'después, cualquier cadena']] },
+  n4: { insight: 'Las dos ramas nunca se cruzan: el primer símbolo decide la rama y queda grabado. Un solo dígito (0 o 1) ya llega a un estado de aceptación, porque empieza y termina con el mismo símbolo.',
+        erParts: [['0((0|1)*0)?', 'rama del 0: un 0 solo, o un 0, cualquier cosa y otro 0 al final'], ['|', 'unión: una rama o la otra'], ['1((0|1)*1)?', 'rama del 1, igual pero con 1'], ['?', 'hace opcional lo que sigue al primer símbolo, para aceptar 0 y 1 solos']] },
+  n5: { insight: 'q₀ es inicial y de aceptación a la vez, por eso la cadena vacía ε se acepta. Una cadena como aba se rechaza aunque empiece bien, porque termina a mitad de un bloque (en q₁).',
+        erParts: [['ab', 'un bloque: a seguida de b'], ['( )*', 'el bloque completo se repite cero o más veces']] },
+  n6: { insight: 'Las y solo pueden ir entre las dos x. Cuando llega la segunda x el patrón termina: cualquier símbolo después (por ejemplo, en xxx) lleva a la trampa q₃.',
+        erParts: [['x', 'la x inicial'], ['(y+)?', 'opcionalmente, una o más y'], ['x', 'la x final, obligatoria']] },
+  n7: { insight: 'q₂ es absorbente: en cuanto aparece "00" la cadena queda aceptada, pase lo que pase después. q₁ solo recuerda que el último símbolo fue 0; un 1 lo devuelve a q₀.',
+        erParts: [['(0|1)*', 'cualquier cadena antes'], ['00', 'los dos ceros seguidos, obligatorios'], ['(0|1)*', 'cualquier cadena después']] },
+  n8: { insight: 'Los dos estados de aceptación recuerdan la última letra para exigir que la siguiente sea la otra. Basta un aa, un bb o empezar con b para caer en la trampa q₃.',
+        erParts: [['a', 'la primera letra debe ser a'], ['(ba)*', 'cero o más pares ba'], ['b?', 'opcionalmente una b al final']] },
+  n9: { insight: 'La letra l solo puede ir una vez y al final. Por eso desde q₂ cualquier símbolo, incluso otro dígito, lleva a la trampa q₃.',
+        erParts: [['d+', 'uno o más dígitos (al menos uno)'], ['l?', 'opcionalmente una letra al final']] },
+  n10: { insight: 'Los 0 no cambian nada: son bucles en los dos estados. Solo los 1 hacen cambiar de estado, alternando entre par (q₀) e impar (q₁).',
+        erParts: [['0*1', 'ceros iniciales y el primer 1: ya hay una cantidad impar'], ['(0*10*1)*', 'pares de 1 con ceros sueltos: no cambian la paridad'], ['0*', 'ceros finales']] },
+  p1: { insight: 'q₂ no significa que la cadena contenga "ab": significa que <b>termina</b> en "ab". En aba, después de leer ab estamos en q₂, pero la a final nos lleva a q₁.',
+        erParts: [['(a + b)', 'se elige a o b (en esta práctica + es la unión)'], ['*', 'cero o más veces: cualquier cadena'], ['ab', 'el final obligatorio']] },
+  p2: { insight: 'Las b no cuentan: son bucles en los dos estados. Solo las a cambian de estado, alternando entre par (q₀) e impar (q₁).',
+        erParts: [['b*', 'b sueltas al inicio'], ['(ab*ab*)', 'un bloque con exactamente dos a (y b sueltas)'], ['*', 'cero o más bloques: la cantidad de a queda par']] },
+  p3: { insight: 'Según el grafo de la práctica, leer una sola a deja en q₁, que no es de aceptación: la cadena necesita al menos dos símbolos.',
+        erParts: [['a(a + b)*a', 'empieza y termina con a'], ['+', 'unión (en esta práctica + significa "o")'], ['b(a + b)*b', 'empieza y termina con b']] },
+  p4: { insight: 'Las a no cuentan: son bucles. Las b recorren el ciclo q₀ → q₁ → q₂ → q₀; cada tres b se vuelve a q₀.',
+        erParts: [['a*', 'a sueltas al inicio'], ['(ba*ba*ba*)', 'un bloque con exactamente tres b'], ['*', 'cero o más bloques: la cantidad de b es múltiplo de 3']] },
+  p5: { insight: 'q₂ es un estado trampa: después de "bb" ninguna continuación puede deshacer el error.',
+        erParts: [['(a + ba)', 'una a, o una b seguida de a'], ['*', 'repetido cero o más veces'], ['(ε + b)', 'al final puede quedar una b sola, o nada']] },
+};
+PRACTICAS.forEach(pr => pr.problems.forEach(pb => Object.assign(pb, LECCION[pb.id])));
+
 const KIND = { intro: 'Enunciado', sigma: 'Alfabeto', memory: 'Idea', state: 'Estados', final: 'Aceptación', trans: 'Transiciones', check: 'Verificación', sim: 'Simulación', er: 'Expresión regular', lang: 'Lenguaje' };
+
+/* ---------- ¿cuántos estados hacen falta? ---------- */
+const show = w => w === '' ? 'ε' : w;
+const run = (p, q, w) => [...w].reduce((st, x) => p.delta[st][x][0], q);
+// Cadena más corta que lleva de q0 a cada estado.
+function accessStrings(p) {
+  const acc = { q0: '' }, queue = ['q0'];
+  while (queue.length) {
+    const q = queue.shift();
+    p.sigma.forEach(x => { const t = p.delta[q][x][0]; if (!(t in acc)) { acc[t] = acc[q] + x; queue.push(t); } });
+  }
+  return acc;
+}
+// Continuación más corta que acepta desde un estado y rechaza desde el otro (null si no existe).
+function separator(p, a, b) {
+  const fin = q => p.F.includes(q);
+  const seen = new Set([a + '|' + b]), queue = [[a, b, '']];
+  while (queue.length) {
+    const [x, y, w] = queue.shift();
+    if (fin(x) !== fin(y)) return w;
+    p.sigma.forEach(c => {
+      const nx = p.delta[x][c][0], ny = p.delta[y][c][0], k = nx + '|' + ny;
+      if (!seen.has(k)) { seen.add(k); queue.push([nx, ny, w + c]); }
+    });
+  }
+  return null;
+}
+function pairsTable(p) {
+  const acc = accessStrings(p), qs = p.states.map(st => st.q), rows = [];
+  const verdict = (q, w) => p.F.includes(run(p, q, w)) ? '<span class="ok">se acepta</span>' : '<span class="no">se rechaza</span>';
+  qs.forEach((a, i) => qs.slice(i + 1).forEach(b => {
+    const w = separator(p, a, b);
+    rows.push(w === null
+      ? `<tr><td class="st">${qn(a)} y ${qn(b)}</td><td>—</td><td class="txt">Ninguna continuación los distingue: se podrían juntar en un solo estado.</td></tr>`
+      : `<tr><td class="st">${qn(a)} y ${qn(b)}</td><td><code>${show(w)}</code></td><td class="txt">${qn(a)}: <code>${show(acc[a] + w)}</code> ${verdict(a, w)} · ${qn(b)}: <code>${show(acc[b] + w)}</code> ${verdict(b, w)}</td></tr>`);
+  }));
+  return `<div class="dtab"><table class="why"><thead><tr><th>Par</th><th>Continuación</th><th>Resultado (ejemplo que llega + continuación)</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+}
+function whyStates(p) {
+  const acc = accessStrings(p), n = p.states.length;
+  return `<div class="method"><b>Método</b><span>1. Pregunta: ¿qué es lo mínimo que necesito saber de lo ya leído para decidir con lo que falte? 2. Cada respuesta posible es un estado. 3. Si hay errores sin vuelta atrás, se agrega un estado trampa. 4. Dos situaciones son estados distintos solo si alguna continuación acepta una y rechaza la otra.</span></div>
+  <h4>Situaciones → estados</h4>
+  <div class="dtab"><table class="why"><thead><tr><th>Estado</th><th>Situación que recuerda</th><th>Ejemplo que llega</th></tr></thead><tbody>${p.states.map(st =>
+    `<tr><td class="st">${qn(st.q)}${p.F.includes(st.q) ? ' <span class="acc">acepta</span>' : ''}${st.trap ? ' <span class="trap">trampa</span>' : ''}</td><td class="txt">${st.meaning}</td><td><code>${show(acc[st.q] ?? '—')}</code></td></tr>`).join('')}</tbody></table></div>
+  <h4>¿Por qué no sobra ningún estado?</h4>
+  <p class="note">Para cada par se busca la continuación más corta que da resultados distintos. Si existe, los dos estados no se pueden juntar.</p>
+  ${pairsTable(p)}
+  <p><b>Por eso hacen falta exactamente ${n} estados.</b></p>`;
+}
 
 function buildSteps(p) {
   const s = [];
   s.push({ k: 'intro', t: 'Leer el enunciado', body: `<p>${p.goal}</p><p class="note">Pulsa <b>Siguiente</b> para construir el autómata. En cada paso se agrega una pieza al grafo y a la quíntupla.</p>` });
   s.push({ k: 'sigma', t: 'Fijar el alfabeto Σ', body: `<p><b>Σ = {${p.sigma.join(', ')}}</b>. Toda cadena de entrada se forma solo con estos dos símbolos. Por eso, al final, de cada estado deberá salir una flecha con ${p.sigma[0]} y otra con ${p.sigma[1]}.</p>` });
-  s.push({ k: 'memory', t: 'Decidir qué debe recordar el autómata', body: `<p>${p.memory}</p><p class="note">Un AFD no tiene memoria aparte: lo único que "recuerda" es en qué estado está.</p>` });
+  s.push({ k: 'memory', t: 'Decidir qué debe recordar el autómata', body: `<p>${p.memory}</p><p class="note">Un AFD no tiene memoria aparte: lo único que "recuerda" es en qué estado está.</p>${whyStates(p)}` });
   p.states.forEach((st, i) => s.push({ k: 'state', q: st.q, t: `Agregar el estado ${qn(st.q)}`,
     body: `<p>${st.meaning}</p>` + (i === 0 ? '<p class="note">Es el estado inicial: la flecha que entra sin origen lo marca.</p>' : '') }));
   s.push({ k: 'final', t: 'Marcar los estados de aceptación', body: `<p>${p.finalText}</p>` });
@@ -863,42 +1007,132 @@ function drawQuint() {
 }
 
 /* ---------- secciones: todos los problemas completos ---------- */
+const fullAt = p => ({ added: Object.fromEntries(p.states.map(s => [s.q, 0])), trans: Object.fromEntries(p.states.map(s => [s.q, 0])), sigma: 0, final: 0 });
+const tag = (p, q) => (q === 'q0' ? ' <span class="ini">inicial</span>' : '') + (p.F.includes(q) ? ' <span class="acc">aceptación</span>' : '') + (p.states.find(s => s.q === q).trap ? ' <span class="trap">trampa</span>' : '');
+const setStr = xs => '{' + xs.join(', ') + '}';
+
+// "Cómo leer el dibujo": una línea por flecha, generada desde δ.
+function readingGuide(p) {
+  const groups = {};
+  p.states.forEach(s => p.sigma.forEach(x => {
+    const [to, why] = p.delta[s.q][x], k = s.q + '>' + to;
+    (groups[k] = groups[k] || { from: s.q, to, syms: [], whys: [] }).syms.push(x);
+    if (!groups[k].whys.includes(why)) groups[k].whys.push(why);
+  }));
+  const li = [`La flecha que entra desde fuera señala el estado inicial <b>q₀</b>.`,
+    `${p.F.map(qn).join(' y ')} ${p.F.length > 1 ? 'tienen' : 'tiene'} doble círculo porque ${p.F.length > 1 ? 'son estados' : 'es el estado'} de aceptación.`];
+  Object.values(groups).forEach(g => li.push(g.from === g.to
+    ? `El bucle en <b>${qn(g.from)}</b> con <code>${g.syms.join(', ')}</code>: permanecemos en ${qn(g.from)}. ${g.whys.join(' ')}`
+    : `La flecha <b>${qn(g.from)} → ${qn(g.to)}</b> con <code>${g.syms.join(', ')}</code>: ${g.whys.join(' ')}`));
+  return '<ul class="guide">' + li.map(x => `<li>${x}</li>`).join('') + '</ul>';
+}
+
+function lessonHTML(p, i) {
+  const n = i + 1, M = 'M' + subN(n), nQ = p.states.length, nS = p.sigma.length;
+  const ok = w => p.F.includes(run(p, 'q0', w));
+  const ex = p.examples.map(w => `<li><code>${show(w)}</code> → <span class="${ok(w) ? 'ok' : 'no'}">${ok(w) ? 'aceptada' : 'rechazada'}</span></li>`).join('');
+  const wEx = p.examples.filter(w => w).slice(0, 3).map(w => `<code>${w}</code>`).join(', ');
+  return `
+  <article class="sec lesson" id="sec-${p.id}">
+    <header class="sec-h">
+      <span class="eyebrow">Problema ${n} · ${p.concepto}</span>
+      <h3>${p.title}</h3>
+      <p class="lead">El enunciado nos da <code>Σ = ${setStr(p.sigma)}</code>. ${p.goal}</p>
+      <div class="exbox"><span class="lbl">Por ejemplo</span><ul class="exlist">${ex}</ul></div>
+    </header>
+
+    <section class="paso"><h4><span class="pn">Paso 1</span> Entender qué nos pide el problema</h4>
+      <p>Primero, necesitas conocer tres conceptos.</p>
+      <div class="concepts">
+        <div class="cpt"><span class="sym">Σ</span><b>Alfabeto</b><span>Es el conjunto de símbolos permitidos. Aquí <code>Σ = ${setStr(p.sigma)}</code>: solo podemos escribir ${p.sigma.map(x => `<code>${x}</code>`).join(' y ')}.</span></div>
+        <div class="cpt"><span class="sym">w</span><b>Cadena</b><span>Es una secuencia de símbolos del alfabeto. Por ejemplo: ${wEx}.</span></div>
+        <div class="cpt"><span class="sym">F</span><b>Estado de aceptación</b><span>Es el estado en el que debe terminar el recorrido para que la cadena sea aceptada.</span></div>
+      </div>
+      <div class="key"><b>La pregunta clave:</b> ¿qué necesitamos recordar de lo que ya leímos para decidir si la cadena se acepta?</div>
+      <p>${p.memory}</p>
+      <ul class="slist">${p.states.map(s => `<li><code>${qn(s.q)}</code>${tag(p, s.q)} <span>${s.meaning}</span></li>`).join('')}</ul>
+      <p class="note">No te preocupes por memorizar los nombres: lo importante es entender qué significa cada estado.</p>
+    </section>
+
+    <section class="paso"><h4><span class="pn">Paso 2</span> Construir los estados</h4>
+      <div class="scards">${p.states.map(s => `<div class="scard${p.F.includes(s.q) ? ' fin' : ''}${s.trap ? ' trp' : ''}"><span class="lbl">${s.q === 'q0' ? 'Estado inicial' : p.F.includes(s.q) ? 'Estado de aceptación' : s.trap ? 'Estado trampa' : 'Estado'}</span><span class="qbig">${qn(s.q)}</span><span>${s.meaning}</span></div>`).join('')}</div>
+      <div class="insight"><b>Observa algo importante:</b> ${p.insight}</div>
+    </section>
+
+    <section class="paso"><h4><span class="pn">Paso 3</span> Encontrar las transiciones</h4>
+      <p>Una <b>transición</b> es el movimiento de un estado a otro al leer un símbolo. Analizamos qué sucede en cada estado con cada símbolo.</p>
+      ${p.states.map((s, k) => `
+        <div class="caso"><h5>Caso ${k + 1}: estamos en ${qn(s.q)}</h5>
+          <div class="tcards">${p.sigma.map(x => { const [to, why] = p.delta[s.q][x]; return `
+            <div class="tcard"><div class="mv"><code>${qn(s.q)}</code><span class="arr">— ${x} →</span><code>${qn(to)}</code></div>
+              <span class="rd">Leemos <code>${x}</code></span><span>${why}</span>
+              <code class="formula">δ(${qn(s.q)}, ${x}) = ${qn(to)}</code></div>`; }).join('')}</div>
+        </div>`).join('')}
+      <p class="note">Tenemos ${nQ} estados y ${nS} símbolos, así que hay que indicar ${nQ} × ${nS} = <b>${nQ * nS} transiciones</b>: una por cada estado y cada símbolo.</p>
+    </section>
+
+    <section class="paso"><h4><span class="pn">Paso 4</span> Dibujar el diagrama de transición</h4>
+      <div class="board static"><svg id="lsvg-${i}" viewBox="0 0 600 400" role="img" aria-label="Diagrama de estados del problema ${n}">${graphSVG(p, fullAt(p), 999, null, 'mk' + i)}</svg></div>
+      <h5>Cómo leer el dibujo</h5>
+      ${readingGuide(p)}
+    </section>
+
+    <section class="paso"><h4><span class="pn">Paso 5</span> Completar los cinco puntos de la práctica</h4>
+      <div class="punto"><h5>1. Quíntupla formal</h5>
+        <p>La quíntupla describe el autómata con cinco elementos: <code>${M} = (Q, Σ, δ, q₀, F)</code>.</p>
+        <ul class="quint5">
+          <li><code>Q = ${setStr(p.states.map(s => qn(s.q)))}</code><span>conjunto de estados</span></li>
+          <li><code>Σ = ${setStr(p.sigma)}</code><span>alfabeto</span></li>
+          <li><code>δ</code><span>función de transición, la que definimos en el paso 3</span></li>
+          <li><code>q₀</code><span>estado inicial</span></li>
+          <li><code>F = ${setStr(p.F.map(qn))}</code><span>conjunto de estados de aceptación</span></li>
+        </ul></div>
+      <div class="punto"><h5>2. Diagrama de transición</h5><p>Es el dibujo del paso 4, con los ${nQ} estados, las flechas y sus etiquetas.</p></div>
+      <div class="punto"><h5>3. Tabla de transición</h5><div class="dtab">${deltaTable(p, fullAt(p), 999, null)}</div>
+        <p class="note">La flecha <code>→</code> señala el estado inicial y el asterisco <code>*</code> señala los estados de aceptación.</p></div>
+      <div class="punto"><h5>4. Expresión regular</h5>
+        <div class="erbig"><code>${p.er}</code></div>
+        <p><b>¿Qué significa cada parte?</b></p>
+        <ul class="parts">${p.erParts.map(([a, b]) => `<li><code>${a}</code><span>${b}</span></li>`).join('')}</ul>
+        <details class="why-d"><summary>Cómo se obtiene</summary><ol class="er">${p.erSteps.map(x => `<li>${x}</li>`).join('')}</ol></details></div>
+      <div class="punto"><h5>5. Descripción del lenguaje</h5>
+        <div class="result"><span class="lbl">Lenguaje</span><code>${p.lang}</code></div>
+        <p><b>En palabras sencillas:</b> ${p.langText}</p></div>
+      <details class="why-d"><summary>¿Por qué ${nQ} estados y no menos?</summary>${pairsTable(p)}</details>
+    </section>
+
+    <section class="paso"><h4><span class="pn">Paso 6</span> Practicar el recorrido del autómata</h4>
+      <p>Elige una cadena y observa cómo se recorre el autómata. El estado final se ilumina en el diagrama del paso 4.</p>
+      <div class="chips">${p.examples.map(w => `<button class="chip" data-lesson="${i}" data-w="${w}">${show(w)}</button>`).join('')}</div>
+      <div class="trace" id="trace-${i}"><p class="note">Toca una cadena para ver su recorrido.</p></div>
+    </section>
+
+    <div class="final-idea"><b>Lo más importante:</b> no memorices las flechas sin comprenderlas. Lee cada símbolo de izquierda a derecha, cambia de estado según la tabla y, al terminar, comprueba dónde estás: si es ${p.F.length > 1 ? 'uno de ' : ''}${setStr(p.F.map(qn))}, aceptas; si no, rechazas.</div>
+    <button class="btn primary" data-build="${i}">Construir paso a paso ↑</button>
+  </article>`;
+}
+
+function showTrace(i, w) {
+  const p = PROBLEMS[i], path = ['q0'];
+  for (const x of w) path.push(p.delta[path[path.length - 1]][x][0]);
+  const end = path[path.length - 1], ok = p.F.includes(end);
+  const steps = path.map((q, k) => (k ? `<span class="tarr">—${w[k - 1]}→</span>` : '') + `<span class="tq">${qn(q)}</span>`).join('');
+  $('trace-' + i).innerHTML = `
+    <div class="tline"><span class="lbl">Cadena</span><code>${show(w)}</code></div>
+    <div class="tpath">${steps}</div>
+    <div class="verdict ${ok ? 'ok' : 'bad'}">Cadena ${ok ? 'aceptada' : 'rechazada'}: el recorrido termina en ${qn(end)}, que ${ok ? 'sí' : 'no'} es de aceptación (F = ${setStr(p.F.map(qn))}).${w ? '' : ' Con la cadena vacía no se lee nada y nos quedamos en q₀.'}</div>`;
+  const last = path.length > 1 ? path[path.length - 2] + '>' + end : null;
+  $('lsvg-' + i).innerHTML = graphSVG(p, fullAt(p), 999, { q: end, lastEdge: last }, 'mk' + i);
+}
+
 function renderSections() {
-  const full = p => ({ added: Object.fromEntries(p.states.map(s => [s.q, 0])), trans: Object.fromEntries(p.states.map(s => [s.q, 0])), sigma: 0, final: 0 });
   $('resumen').innerHTML = PROBLEMS.map((p, i) =>
     `<tr><td class="num">${i + 1}</td><td><a href="#sec-${p.id}">${p.title}</a></td><td>${p.tema}</td><td>${p.concepto}</td><td><code>${p.er}</code></td></tr>`).join('');
-  $('secciones').innerHTML = PROBLEMS.map((p, i) => `
-    <article class="sec" id="sec-${p.id}">
-      <header class="sec-h">
-        <span class="eyebrow">Problema ${i + 1}</span>
-        <h3>${p.title}</h3>
-        <p class="tema"><b>Tema:</b> ${p.tema} <span class="concept">${p.concepto}</span></p>
-      </header>
-      <div class="sec-grid">
-        <div class="board static"><svg viewBox="0 0 600 400" role="img" aria-label="Diagrama de estados del problema ${i + 1}">${graphSVG(p, full(p), 999, null, 'mk' + i)}</svg></div>
-        <div class="sec-info">
-          <div class="qbox">
-            <div class="qtitle">M${subN(i + 1)} = (Q, Σ, δ, q₀, F)</div>
-            <div class="qrow"><span class="k">Q</span><span class="v">{ ${p.states.map(s => qn(s.q)).join(', ')} }</span></div>
-            <div class="qrow"><span class="k">Σ</span><span class="v">{ ${p.sigma.join(', ')} }</span></div>
-            <div class="qrow"><span class="k">q₀</span><span class="v">q₀</span></div>
-            <div class="qrow"><span class="k">F</span><span class="v">{ ${p.F.map(qn).join(', ')} }</span></div>
-            <div class="qrow"><span class="k">δ</span><span class="v dtab">${deltaTable(p, full(p), 999, null)}</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="sec-cols">
-        <div><h4>Interpretación del grafo</h4>
-          <ul class="interp">${p.states.map(s => `<li><code>${qn(s.q)}</code>${p.F.includes(s.q) ? ' <span class="acc">aceptación</span>' : ''}${s.q === 'q0' ? ' <span class="ini">inicial</span>' : ''}${s.trap ? ' <span class="trap">trampa</span>' : ''}<span>${s.meaning}</span></li>`).join('')}</ul>
-        </div>
-        <div class="sec-res">
-          <div class="result"><span class="lbl">Expresión regular</span><code>${p.er}</code></div>
-          <div class="result"><span class="lbl">Lenguaje regular</span><code>${p.lang}</code></div>
-          <p class="note">${p.langText}</p>
-          <button class="btn primary" data-build="${i}">Construir paso a paso ↑</button>
-        </div>
-      </div>
-    </article>`).join('');
+  $('secciones').innerHTML = PROBLEMS.map(lessonHTML).join('');
+  document.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll(`[data-lesson="${b.dataset.lesson}"]`).forEach(c => c.classList.toggle('on', c === b));
+    showTrace(+b.dataset.lesson, b.dataset.w);
+  }));
   document.querySelectorAll('[data-build]').forEach(b => b.addEventListener('click', () => {
     selectProblem(+b.dataset.build);
     document.getElementById('top').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
