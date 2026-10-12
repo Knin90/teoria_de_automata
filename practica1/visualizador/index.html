@@ -200,12 +200,20 @@ table.sum a, .sec a { color: var(--accent); }
 .acc, .ini { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 1px 8px; border: 1px solid currentColor; }
 .acc { color: var(--ok); } .ini { color: var(--muted); }
 .sec-res .btn { justify-self: start; }
+.practicas { display: flex; flex-wrap: wrap; gap: 8px; }
+.prac { font: inherit; font-size: 15px; font-weight: 600; display: inline-flex; align-items: baseline; gap: 8px; padding: 9px 16px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.prac span { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.prac[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.prac[aria-selected="true"] span { color: var(--accent); }
+.prac:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.trap { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 1px 8px; border: 1px solid currentColor; color: var(--bad); }
 </style>
 
 <div class="wrap">
   <header id="top" class="top">
     <div class="top-t">
-      <span class="eyebrow">Teoría de Autómatas · Práctica N° 1 · Universidad de Panamá</span>
+      <span class="eyebrow" id="eyebrow"></span>
       <h1>Construye el <em>AFD</em> paso a paso</h1>
     </div>
     <div class="theme" role="radiogroup" aria-label="Tema de la página">
@@ -215,7 +223,8 @@ table.sum a, .sec a { color: var(--accent); }
     </div>
   </header>
 
-  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="practicas" role="tablist" aria-label="Práctica" id="practicas"></div>
+  <div class="tabs" role="tablist" aria-label="Problema" id="tabs"></div>
 
   <div class="grid">
     <div class="board">
@@ -264,15 +273,12 @@ table.sum a, .sec a { color: var(--accent); }
     <div class="general">
       <div>
         <h3>Tema general</h3>
-        <p><b>Teoría de Autómatas y Lenguajes Formales</b>, con enfoque en los <b>Autómatas Finitos Deterministas (AFD)</b>. En todos los problemas el alfabeto es Σ = {a, b}.</p>
+        <p id="gentext"></p>
+        <p class="note" id="gennota"></p>
       </div>
       <div>
         <h3>Para cada problema se pide</h3>
-        <ol class="pide">
-          <li>La quíntupla formal <code>M = (Q, Σ, δ, q₀, F)</code></li>
-          <li>La expresión regular (ER)</li>
-          <li>El lenguaje regular en notación de conjuntos <code>L(M)</code></li>
-        </ol>
+        <ol class="pide" id="genpide"></ol>
       </div>
     </div>
     <div class="sumwrap">
@@ -286,10 +292,11 @@ table.sum a, .sec a { color: var(--accent); }
 </div>
 
 <script>
-const SUB = ['₀','₁','₂','₃','₄','₅'];
+const SUB = ['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'];
+const subN = n => String(n).replace(/\d/g, d => SUB[d]);
 const qn = q => 'q' + SUB[+q.slice(1)];
 
-const PROBLEMS = [
+const PRACTICA1 = [
   {
     id: 'p1', title: 'Cadenas que terminan en “ab”', tema: 'Reconocimiento de un sufijo específico (“ab”).', concepto: 'Reconocimiento de patrones al final', short: 'Termina en ab',
     goal: 'Construir un AFD que acepte exactamente las cadenas sobre {a, b} que <b>terminan en "ab"</b>. Por ejemplo: ab, aab, bab, abab.',
@@ -414,18 +421,298 @@ const PROBLEMS = [
   },
 ];
 
+const CLASE = [
+  {
+    id: 'n1', title: 'Cadenas que terminan con la letra “b”', short: 'Termina en b', sigma: ['a', 'b'],
+    tema: 'Cadenas que terminan con una letra específica.', concepto: 'Reconocimiento del último símbolo',
+    goal: 'Diseñar un AFD que acepte todas las cadenas sobre {a, b} que <b>terminan exactamente con la letra b</b>. Aceptadas: b, ab, aab, bb. Rechazadas: a, ba, ε.',
+    memory: 'Solo importa <b>cuál fue el último símbolo leído</b>: si fue b, la cadena (hasta ese momento) termina en b. Son 2 situaciones, así que 2 estados.',
+    states: [
+      { q: 'q0', x: 180, y: 210, loop: -90, init: 180, meaning: 'La cadena leída no termina en b: está vacía o su último símbolo es a.' },
+      { q: 'q1', x: 420, y: 210, loop: -90, meaning: 'La cadena leída termina en b.' },
+    ],
+    F: ['q1'],
+    finalText: 'Aceptamos cuando el último símbolo es b: <b>F = {q₁}</b>. q₀ no es final, por eso ε se rechaza.',
+    delta: {
+      q0: { a: ['q0', 'Una a: la cadena sigue sin terminar en b.'], b: ['q1', 'Una b: ahora la cadena termina en b.'] },
+      q1: { a: ['q0', 'Llega una a: deja de terminar en b.'], b: ['q1', 'Otra b: sigue terminando en b.'] },
+    },
+    bends: { 'q0>q1': 35, 'q1>q0': 35 },
+    check: '2 estados × 2 símbolos = 4 transiciones, todas definidas. Toda a lleva a q₀ y toda b lleva a q₁.',
+    erSteps: ['Antes de la b final puede venir cualquier cantidad de a y b, incluso ninguna: (a|b)*. El cuantificador * representa esas repeticiones previas.', 'Después viene obligatoriamente una b.', 'Concatenando: (a|b)*b.'],
+    er: '(a|b)*b',
+    lang: 'L(M₁) = { w ∈ {a, b}* | w = xb, x ∈ {a, b}* }',
+    langText: 'Todas las cadenas cuyo último símbolo es b.',
+    examples: ['ab', 'aab', 'bb', 'ba', ''],
+  },
+  {
+    id: 'n2', title: 'Presencia opcional del prefijo “0”', short: '0 opcional y luego 1', sigma: ['0', '1'],
+    tema: 'Un prefijo opcional seguido de una repetición obligatoria.', concepto: 'Cuantificadores ? y +',
+    goal: 'Diseñar un AFD que acepte cadenas que comienzan <b>opcionalmente con un 0</b>, seguido obligatoriamente de <b>uno o más 1</b>. Aceptadas: 1, 01, 11, 0111. Rechazadas: 0, ε, 10.',
+    memory: 'Hay que distinguir cuatro situaciones: no se ha leído nada; se leyó el 0 opcional; ya hay al menos un 1; o la cadena se salió del patrón. Son 4 estados, uno de ellos trampa.',
+    states: [
+      { q: 'q0', x: 90, y: 150, init: 180, meaning: 'No se ha leído nada.' },
+      { q: 'q1', x: 210, y: 300, meaning: 'Se leyó el 0 opcional; falta al menos un 1.' },
+      { q: 'q2', x: 350, y: 150, loop: -90, meaning: 'Ya se leyó al menos un 1 (con o sin el 0 al inicio).' },
+      { q: 'q3', x: 480, y: 300, loop: 0, trap: true, meaning: 'Estado trampa: apareció un 0 donde no se permite (un segundo 0, o un 0 después de los 1).' },
+    ],
+    F: ['q2'],
+    finalText: 'Aceptamos cuando ya hay al menos un 1: <b>F = {q₂}</b>.',
+    delta: {
+      q0: { '0': ['q1', 'Se lee el 0 opcional del inicio.'], '1': ['q2', 'Sin 0 inicial: empieza directamente con 1.'] },
+      q1: { '0': ['q3', 'Un segundo 0 no está permitido.'], '1': ['q2', 'Llega el primer 1 después del 0.'] },
+      q2: { '0': ['q3', 'Un 0 después de los 1 rompe el patrón.'], '1': ['q2', 'Más 1: el cuantificador + permite repetirlos.'] },
+      q3: { '0': ['q3', 'De la trampa no se sale.'], '1': ['q3', 'De la trampa no se sale.'] },
+    },
+    bends: {},
+    check: '4 estados × 2 símbolos = 8 transiciones. El estado trampa q₃ completa δ: sin él faltarían δ(q₁, 0) y δ(q₂, 0).',
+    erSteps: ['El 0 del inicio es opcional: 0?.', 'Después vienen uno o más 1: 1+.', 'Concatenando: 0?1+.'],
+    er: '0?1+',
+    lang: 'L(M₂) = { 0ⁱ1ⁿ | i ∈ {0, 1}, n ≥ 1 }',
+    langText: 'Cero o un 0 al inicio, seguido de al menos un 1, y nada más.',
+    examples: ['0111', '1', '01', '10', '0'],
+  },
+  {
+    id: 'n3', title: 'Cadenas con al menos una “a”', short: 'Al menos una a', sigma: ['a', 'b'],
+    tema: 'Exigir que un símbolo aparezca al menos una vez.', concepto: 'Estado de aceptación absorbente',
+    goal: 'Diseñar un AFD que reconozca las cadenas que contienen <b>al menos una a</b>. Aceptadas: a, ba, aba, bbbbab. Rechazadas: b, bb, ε.',
+    memory: 'Solo importa si <b>ya apareció una a</b> o todavía no. 2 estados.',
+    states: [
+      { q: 'q0', x: 180, y: 210, loop: -90, init: 180, meaning: 'Todavía no aparece ninguna a (solo b, o nada).' },
+      { q: 'q1', x: 420, y: 210, loop: -90, meaning: 'Ya apareció al menos una a. Lo que venga después no cambia eso.' },
+    ],
+    F: ['q1'],
+    finalText: '<b>F = {q₁}</b>. Una vez en q₁ la cadena queda aceptada, sin importar lo que siga.',
+    delta: {
+      q0: { a: ['q1', 'Aparece la primera a.'], b: ['q0', 'Más b: seguimos sin a.'] },
+      q1: { a: ['q1', 'Ya había una a.'], b: ['q1', 'Ya había una a.'] },
+    },
+    bends: {},
+    check: '2 × 2 = 4 transiciones. q₁ es absorbente: todas sus flechas vuelven a él.',
+    erSteps: ['Antes de la primera a solo puede haber b: b*.', 'Luego la primera a.', 'Después, cualquier cosa: (a|b)*.', 'Concatenando: b*a(a|b)*.'],
+    er: 'b*a(a|b)*',
+    lang: 'L(M₃) = { w ∈ {a, b}* | |w|ₐ ≥ 1 }',
+    langText: '|w|ₐ es la cantidad de a en w. Equivale a w = xay, con x, y ∈ {a, b}*.',
+    examples: ['bbbbab', 'ba', 'a', 'bb', ''],
+  },
+  {
+    id: 'n4', title: 'Cadenas que comienzan y terminan con la misma letra', short: 'Mismo símbolo al inicio y al final', sigma: ['0', '1'],
+    tema: 'Cadenas de longitud ≥ 1 con el mismo primer y último símbolo.', concepto: 'Memoria del primer símbolo',
+    goal: 'Diseñar un AFD para cadenas de <b>longitud ≥ 1</b> que <b>comienzan y terminan con el mismo símbolo</b> (0…0, 1…1, o un solo dígito). Aceptadas: 0, 1, 00, 101, 11101. Rechazadas: 01, 10.',
+    memory: 'Hay que recordar <b>con qué símbolo empezó</b> (eso no cambia) y <b>si el último leído coincide</b> con él. El autómata se divide en la rama del 0 (q₁, q₂) y la rama del 1 (q₃, q₄).',
+    states: [
+      { q: 'q0', x: 90, y: 205, init: 180, meaning: 'No se ha leído nada. No acepta, porque ε tiene longitud 0.' },
+      { q: 'q1', x: 270, y: 105, loop: -90, meaning: 'Empezó con 0 y el último símbolo es 0.' },
+      { q: 'q2', x: 480, y: 105, loop: -90, meaning: 'Empezó con 0 y el último símbolo es 1.' },
+      { q: 'q3', x: 270, y: 305, loop: 90, meaning: 'Empezó con 1 y el último símbolo es 1.' },
+      { q: 'q4', x: 480, y: 305, loop: 90, meaning: 'Empezó con 1 y el último símbolo es 0.' },
+    ],
+    F: ['q1', 'q3'],
+    finalText: 'Aceptamos cuando el último coincide con el primero: <b>F = {q₁, q₃}</b>. Un solo dígito ya llega a q₁ o a q₃, por eso 0 y 1 se aceptan.',
+    delta: {
+      q0: { '0': ['q1', 'Empieza con 0: rama del 0. Primero y último coinciden.'], '1': ['q3', 'Empieza con 1: rama del 1.'] },
+      q1: { '0': ['q1', 'Sigue terminando en 0.'], '1': ['q2', 'Ahora termina en 1, distinto del primero.'] },
+      q2: { '0': ['q1', 'Vuelve a terminar en 0.'], '1': ['q2', 'Sigue terminando en 1.'] },
+      q3: { '0': ['q4', 'Ahora termina en 0, distinto del primero.'], '1': ['q3', 'Sigue terminando en 1.'] },
+      q4: { '0': ['q4', 'Sigue terminando en 0.'], '1': ['q3', 'Vuelve a terminar en 1.'] },
+    },
+    bends: { 'q1>q2': 28, 'q2>q1': 28, 'q3>q4': 28, 'q4>q3': 28 },
+    check: '5 × 2 = 10 transiciones. Ninguna flecha cruza de una rama a la otra: el primer símbolo queda grabado.',
+    erSteps: ['Rama del 0: un 0 solo, o 0, cualquier cosa y 0 al final: 0((0|1)*0)?.', 'Rama del 1: 1((0|1)*1)?.', 'El ? hace opcional todo lo que sigue al primer símbolo; así se aceptan 0 y 1 solos.', 'Unimos las dos ramas con |.'],
+    er: '0((0|1)*0)?|1((0|1)*1)?',
+    lang: 'L(M₄) = { w ∈ {0, 1}⁺ | el primer símbolo de w es igual al último }',
+    langText: '{0, 1}⁺ son las cadenas de longitud ≥ 1. Equivale a w = σ o w = σxσ, con σ ∈ {0, 1} y x ∈ {0, 1}*.',
+    examples: ['11101', '101', '0', '01', '10'],
+  },
+  {
+    id: 'n5', title: 'Cero o más bloques repetidos de “ab”', short: 'Bloques (ab)*', sigma: ['a', 'b'],
+    tema: 'Repetición consecutiva de una secuencia fija.', concepto: 'Ciclo que vuelve al estado inicial',
+    goal: 'Diseñar un AFD que acepte la <b>cadena vacía</b> y cualquier <b>repetición consecutiva de "ab"</b>: ab, abab, ababab, …',
+    memory: 'Hay que saber si estamos <b>al final de un bloque completo</b> o <b>a mitad de un bloque</b> (se leyó la a y falta la b), y si la cadena ya se salió del patrón. 3 estados, uno trampa.',
+    states: [
+      { q: 'q0', x: 150, y: 160, init: 180, meaning: 'Se han leído cero o más bloques "ab" completos. Es inicial y final, por eso ε se acepta.' },
+      { q: 'q1', x: 410, y: 160, meaning: 'A mitad de un bloque: se leyó la a y falta la b.' },
+      { q: 'q2', x: 280, y: 300, loop: 90, trap: true, meaning: 'Estado trampa: la cadena se salió del patrón (una b sin a antes, o dos a seguidas).' },
+    ],
+    F: ['q0'],
+    finalText: '<b>F = {q₀}</b>: solo se acepta con bloques completos.',
+    delta: {
+      q0: { a: ['q1', 'Empieza un bloque nuevo.'], b: ['q2', 'Una b sin a antes no forma "ab".'] },
+      q1: { a: ['q2', 'Dos a seguidas no forman "ab".'], b: ['q0', 'Se completa el bloque "ab".'] },
+      q2: { a: ['q2', 'De la trampa no se sale.'], b: ['q2', 'De la trampa no se sale.'] },
+    },
+    bends: { 'q0>q1': 30, 'q1>q0': 30 },
+    check: '3 × 2 = 6 transiciones. El ciclo q₀ → q₁ → q₀ lee exactamente un bloque "ab"; la trampa q₂ completa δ.',
+    erSteps: ['Cada vuelta al ciclo q₀ → q₁ → q₀ lee un bloque ab.', 'El ciclo se puede repetir cero o más veces: (ab)*.'],
+    er: '(ab)*',
+    lang: 'L(M₅) = { (ab)ⁿ | n ≥ 0 }',
+    langText: 'Con n = 0 se obtiene ε; con n = 1, ab; con n = 2, abab; y así sucesivamente.',
+    examples: ['abab', 'ababab', '', 'aba', 'ba'],
+  },
+  {
+    id: 'n6', title: 'Secuencia con repetición opcional intermedia', short: 'x, y opcionales, x', sigma: ['x', 'y'],
+    tema: 'Una repetición opcional entre dos símbolos obligatorios.', concepto: 'Bucle intermedio opcional',
+    goal: 'Diseñar un AFD que acepte cadenas que <b>inician con x</b>, seguidas <b>opcionalmente de una o más y</b>, y que <b>terminan obligatoriamente con x</b>. Aceptadas: xx, xyx, xyyyx. Rechazadas: x, yx, xy.',
+    memory: 'Hay que saber en qué parte del patrón x…x estamos: antes de la primera x, en medio (leyendo y) o después de la x final. Además hace falta un estado trampa. 4 estados.',
+    states: [
+      { q: 'q0', x: 80, y: 150, init: 180, meaning: 'No se ha leído nada.' },
+      { q: 'q1', x: 260, y: 150, loop: -90, meaning: 'Se leyó la x inicial; ahora pueden venir y, o la x final.' },
+      { q: 'q2', x: 450, y: 150, meaning: 'Se leyó la x final: el patrón está completo.' },
+      { q: 'q3', x: 300, y: 300, loop: 90, trap: true, meaning: 'Estado trampa: empezó con y, o vino algo después de la x final.' },
+    ],
+    F: ['q2'],
+    finalText: '<b>F = {q₂}</b>: solo cuando ya llegó la x final.',
+    delta: {
+      q0: { x: ['q1', 'Llega la x inicial.'], y: ['q3', 'No puede empezar con y.'] },
+      q1: { x: ['q2', 'Llega la x final (con o sin y en medio).'], y: ['q1', 'Una y intermedia; pueden ser varias.'] },
+      q2: { x: ['q3', 'Después de la x final no puede venir nada.'], y: ['q3', 'Después de la x final no puede venir nada.'] },
+      q3: { x: ['q3', 'De la trampa no se sale.'], y: ['q3', 'De la trampa no se sale.'] },
+    },
+    bends: {},
+    check: '4 × 2 = 8 transiciones. El bucle en q₁ representa las y intermedias; la trampa q₃ completa δ.',
+    erSteps: ['Empieza con x.', 'Luego, opcionalmente, una o más y: (y+)?.', 'Termina con x.', 'Concatenando: x(y+)?x, que es equivalente a xy*x.'],
+    er: 'x(y+)?x',
+    lang: 'L(M₆) = { x yⁿ x | n ≥ 0 }',
+    langText: 'Una x, cualquier cantidad de y (incluso ninguna) y una x final.',
+    examples: ['xyyyx', 'xx', 'xyx', 'xy', 'yx'],
+  },
+  {
+    id: 'n7', title: 'Cadenas que contienen dos ceros consecutivos', short: 'Contiene 00', sigma: ['0', '1'],
+    tema: 'Detectar una subcadena en cualquier posición.', concepto: 'Búsqueda de patrón con estado absorbente',
+    goal: 'Diseñar un AFD que acepte cualquier cadena que <b>contenga "00"</b> en cualquier posición. Aceptadas: 00, 1001, 1100, 000. Rechazadas: 1, 1010, ε.',
+    memory: 'Hay que recordar cuánto del patrón "00" llevamos: nada, un 0, o "00" completo. Una vez encontrado, ya no se pierde. 3 estados.',
+    states: [
+      { q: 'q0', x: 110, y: 200, loop: -90, init: 180, meaning: 'Aún no aparece "00" y el último símbolo no es 0 (o no se ha leído nada).' },
+      { q: 'q1', x: 300, y: 200, meaning: 'Aún no aparece "00", pero el último símbolo es 0.' },
+      { q: 'q2', x: 490, y: 200, loop: -90, meaning: 'Ya apareció "00". Lo que siga no cambia el resultado.' },
+    ],
+    F: ['q2'],
+    finalText: '<b>F = {q₂}</b>.',
+    delta: {
+      q0: { '0': ['q1', 'Un 0: podría empezar "00".'], '1': ['q0', 'Un 1: sin avance.'] },
+      q1: { '0': ['q2', 'Segundo 0 seguido: apareció "00".'], '1': ['q0', 'El 1 corta la racha de ceros.'] },
+      q2: { '0': ['q2', 'Ya se encontró "00".'], '1': ['q2', 'Ya se encontró "00".'] },
+    },
+    bends: { 'q0>q1': 30, 'q1>q0': 30 },
+    check: '3 × 2 = 6 transiciones. q₂ es absorbente.',
+    erSteps: ['Antes de "00" puede haber cualquier cosa: (0|1)*.', 'Luego el patrón: 00.', 'Después, cualquier cosa: (0|1)*.', 'Concatenando: (0|1)*00(0|1)*.'],
+    er: '(0|1)*00(0|1)*',
+    lang: 'L(M₇) = { w ∈ {0, 1}* | w = x00y, x, y ∈ {0, 1}* }',
+    langText: 'El título dice "exactamente dos ceros consecutivos", pero el enunciado pide que la cadena contenga "00" y acepta 000. Aquí se sigue el enunciado y sus ejemplos.',
+    examples: ['1001', '1100', '000', '1010', '1'],
+  },
+  {
+    id: 'n8', title: 'Cadenas alternas de longitud arbitraria', short: 'Alternas desde a', sigma: ['a', 'b'],
+    tema: 'Alternancia estricta de dos símbolos, empezando con uno fijo.', concepto: 'Estados que alternan y estado trampa',
+    goal: 'Diseñar un AFD que acepte cadenas donde las letras <b>se alternan estrictamente comenzando con a</b>: a, ab, aba, abab, …',
+    memory: 'Hay que recordar <b>cuál fue la última letra</b>, para exigir que la siguiente sea la otra, y si ya se rompió la alternancia. 4 estados, uno trampa.',
+    states: [
+      { q: 'q0', x: 90, y: 150, init: 180, meaning: 'No se ha leído nada. No acepta: la cadena debe empezar con a.' },
+      { q: 'q1', x: 270, y: 150, meaning: 'La alternancia va bien y la última letra es a.' },
+      { q: 'q2', x: 450, y: 150, meaning: 'La alternancia va bien y la última letra es b.' },
+      { q: 'q3', x: 270, y: 300, loop: 90, trap: true, meaning: 'Estado trampa: empezó con b, o se repitió una letra (aa o bb).' },
+    ],
+    F: ['q1', 'q2'],
+    finalText: '<b>F = {q₁, q₂}</b>: se acepta mientras la alternancia siga correcta, termine en a o en b.',
+    delta: {
+      q0: { a: ['q1', 'Empieza con a, como se exige.'], b: ['q3', 'No puede empezar con b.'] },
+      q1: { a: ['q3', 'aa rompe la alternancia.'], b: ['q2', 'Después de a viene b.'] },
+      q2: { a: ['q1', 'Después de b viene a.'], b: ['q3', 'bb rompe la alternancia.'] },
+      q3: { a: ['q3', 'De la trampa no se sale.'], b: ['q3', 'De la trampa no se sale.'] },
+    },
+    bends: { 'q1>q2': 30, 'q2>q1': 30 },
+    check: '4 × 2 = 8 transiciones. El ciclo q₁ ⇄ q₂ produce la alternancia; la trampa q₃ completa δ.',
+    erSteps: ['Empieza con a.', 'Luego cero o más pares "ba": (ba)*.', 'Al final, opcionalmente, una b: b?.', 'Concatenando: a(ba)*b?.'],
+    er: 'a(ba)*b?',
+    lang: 'L(M₈) = { (ab)ⁿa | n ≥ 0 } ∪ { (ab)ⁿ | n ≥ 1 }',
+    langText: 'Cadenas no vacías que empiezan con a y no contienen aa ni bb.',
+    examples: ['abab', 'aba', 'a', 'abba', 'ba'],
+  },
+  {
+    id: 'n9', title: 'Identificador numérico con sufijo opcional de letra', short: 'Dígitos y letra opcional', sigma: ['d', 'l'],
+    tema: 'Una o más repeticiones seguidas de un sufijo opcional.', concepto: 'Cuantificadores + y ?',
+    goal: 'Con Σ = {d, l} (d representa un dígito y l una letra), diseñar un AFD que acepte <b>uno o más dígitos</b>, seguidos <b>opcionalmente de una letra</b>. Aceptadas: d, dd, dl, dddl. Rechazadas: l, ld, ε.',
+    memory: 'Hay que saber si ya hay al menos un dígito, si ya se puso la letra final, y si la cadena se salió del patrón. 4 estados, uno trampa.',
+    states: [
+      { q: 'q0', x: 80, y: 150, init: 180, meaning: 'No se ha leído nada.' },
+      { q: 'q1', x: 260, y: 150, loop: -90, meaning: 'Se han leído uno o más dígitos.' },
+      { q: 'q2', x: 450, y: 150, meaning: 'Dígitos seguidos de la letra opcional: el identificador terminó.' },
+      { q: 'q3', x: 300, y: 300, loop: 90, trap: true, meaning: 'Estado trampa: empezó con letra, o vino algo después de la letra.' },
+    ],
+    F: ['q1', 'q2'],
+    finalText: '<b>F = {q₁, q₂}</b>: con solo dígitos, o con dígitos y la letra final.',
+    delta: {
+      q0: { d: ['q1', 'Primer dígito.'], l: ['q3', 'No puede empezar con letra.'] },
+      q1: { d: ['q1', 'Más dígitos: el + permite repetirlos.'], l: ['q2', 'La letra opcional al final.'] },
+      q2: { d: ['q3', 'Después de la letra no puede venir nada.'], l: ['q3', 'Solo se permite una letra.'] },
+      q3: { d: ['q3', 'De la trampa no se sale.'], l: ['q3', 'De la trampa no se sale.'] },
+    },
+    bends: {},
+    check: '4 × 2 = 8 transiciones. La trampa q₃ completa δ.',
+    erSteps: ['Uno o más dígitos: d+.', 'Opcionalmente una letra: l?.', 'Concatenando: d+l?.'],
+    er: 'd+l?',
+    lang: 'L(M₉) = { dⁿlᵐ | n ≥ 1, m ∈ {0, 1} }',
+    langText: 'Al menos un dígito y, como máximo, una letra al final.',
+    examples: ['dddl', 'dd', 'd', 'ld', 'l'],
+  },
+  {
+    id: 'n10', title: 'Cadenas con número impar de “1”', short: 'Número impar de 1', sigma: ['0', '1'],
+    tema: 'Contar la paridad de un símbolo (impar).', concepto: 'Contador módulo 2',
+    goal: 'Diseñar un AFD que acepte las cadenas binarias con una <b>cantidad impar de 1</b>. Aceptadas: 1, 010, 111, 00100. Rechazadas: ε, 00, 11.',
+    memory: 'Solo importa si la cantidad de 1 leída es <b>par</b> o <b>impar</b>. 2 estados.',
+    states: [
+      { q: 'q0', x: 180, y: 210, loop: -90, init: 180, meaning: 'Cantidad par de 1 (al inicio hay 0, que es par).' },
+      { q: 'q1', x: 420, y: 210, loop: -90, meaning: 'Cantidad impar de 1.' },
+    ],
+    F: ['q1'],
+    finalText: '<b>F = {q₁}</b>. q₀ no es final, así que ε se rechaza.',
+    delta: {
+      q0: { '0': ['q0', 'El 0 no cambia la paridad.'], '1': ['q1', 'Un 1 más: de par a impar.'] },
+      q1: { '0': ['q1', 'El 0 no cambia la paridad.'], '1': ['q0', 'Un 1 más: de impar a par.'] },
+    },
+    bends: { 'q0>q1': 35, 'q1>q0': 35 },
+    check: '2 × 2 = 4 transiciones. Los 0 son bucles; los 1 cambian de estado.',
+    erSteps: ['Ceros iniciales y el primer 1: 0*1.', 'Después, pares de 1 con ceros sueltos: (0*10*1)*.', 'Ceros finales: 0*.', 'Concatenando: 0*1(0*10*1)*0*.'],
+    er: '0*1(0*10*1)*0*',
+    lang: 'L(M₁₀) = { w ∈ {0, 1}* | |w|₁ es impar }',
+    langText: '|w|₁ es la cantidad de 1 en w.',
+    examples: ['00100', '010', '111', '11', '00'],
+  },
+];
+PRACTICA1.forEach(p => { p.sigma = ['a', 'b']; });
+
+const PRACTICAS = [
+  {
+    id: 'clase', nombre: 'Práctica de clase', detalle: '10 problemas',
+    eyebrow: 'Teoría de Autómatas y Lenguajes Formales · Práctica de clase · 1-10-2026',
+    general: '<b>Teoría de Autómatas y Lenguajes Formales</b>, con enfoque en los <b>Autómatas Finitos Deterministas (AFD)</b>. Cada problema tiene su propio alfabeto: {a, b}, {0, 1}, {x, y} o {d, l}.',
+    pide: ['Definir formalmente la quíntupla <code>M = (Q, Σ, δ, q₀, F)</code> del AFD', 'Dibujar el diagrama de transición', 'Elaborar la tabla de transición', 'Obtener la expresión regular, usando bien los cuantificadores <code>*</code>, <code>+</code> y <code>?</code>', 'Describir formalmente el lenguaje regular aceptado'],
+    nota: 'Notación de las ER en esta práctica: <code>|</code> es la unión, <code>*</code> significa cero o más veces, <code>+</code> una o más veces y <code>?</code> opcional (cero o una vez).',
+    problems: CLASE,
+  },
+  {
+    id: 'p1', nombre: 'Práctica N° 1', detalle: '5 problemas',
+    eyebrow: 'Teoría de Autómatas · Práctica N° 1 · Universidad de Panamá',
+    general: '<b>Teoría de Autómatas y Lenguajes Formales</b>, con enfoque en los <b>Autómatas Finitos Deterministas (AFD)</b>. En todos los problemas el alfabeto es Σ = {a, b}.',
+    pide: ['La quíntupla formal <code>M = (Q, Σ, δ, q₀, F)</code>', 'La expresión regular (ER)', 'El lenguaje regular en notación de conjuntos <code>L(M)</code>'],
+    nota: 'Notación de las ER en esta práctica: <code>+</code> es la unión (por ejemplo a + b) y <code>*</code> la clausura de Kleene.',
+    problems: PRACTICA1,
+  },
+];
+let PR = PRACTICAS[0], PROBLEMS = PR.problems;
+
 const KIND = { intro: 'Enunciado', sigma: 'Alfabeto', memory: 'Idea', state: 'Estados', final: 'Aceptación', trans: 'Transiciones', check: 'Verificación', sim: 'Simulación', er: 'Expresión regular', lang: 'Lenguaje' };
 
 function buildSteps(p) {
   const s = [];
   s.push({ k: 'intro', t: 'Leer el enunciado', body: `<p>${p.goal}</p><p class="note">Pulsa <b>Siguiente</b> para construir el autómata. En cada paso se agrega una pieza al grafo y a la quíntupla.</p>` });
-  s.push({ k: 'sigma', t: 'Fijar el alfabeto Σ', body: '<p><b>Σ = {a, b}</b>. Toda cadena de entrada se forma solo con estos dos símbolos. Por eso, al final, de cada estado deberá salir una flecha con a y otra con b.</p>' });
+  s.push({ k: 'sigma', t: 'Fijar el alfabeto Σ', body: `<p><b>Σ = {${p.sigma.join(', ')}}</b>. Toda cadena de entrada se forma solo con estos dos símbolos. Por eso, al final, de cada estado deberá salir una flecha con ${p.sigma[0]} y otra con ${p.sigma[1]}.</p>` });
   s.push({ k: 'memory', t: 'Decidir qué debe recordar el autómata', body: `<p>${p.memory}</p><p class="note">Un AFD no tiene memoria aparte: lo único que "recuerda" es en qué estado está.</p>` });
   p.states.forEach((st, i) => s.push({ k: 'state', q: st.q, t: `Agregar el estado ${qn(st.q)}`,
     body: `<p>${st.meaning}</p>` + (i === 0 ? '<p class="note">Es el estado inicial: la flecha que entra sin origen lo marca.</p>' : '') }));
   s.push({ k: 'final', t: 'Marcar los estados de aceptación', body: `<p>${p.finalText}</p>` });
   p.states.forEach(st => s.push({ k: 'trans', q: st.q, t: `Conectar las transiciones desde ${qn(st.q)}`,
-    body: '<ul class="tl">' + ['a', 'b'].map(x => { const [to, why] = p.delta[st.q][x];
+    body: '<ul class="tl">' + p.sigma.map(x => { const [to, why] = p.delta[st.q][x];
       return `<li><code>δ(${qn(st.q)}, ${x}) = ${qn(to)}</code><span>${why}</span></li>`; }).join('') + '</ul>' }));
   s.push({ k: 'check', t: 'Comprobar que δ está completa', body: `<p>${p.check}</p>` });
   s.push({ k: 'sim', t: 'Probar cadenas en el autómata', body: '' });
@@ -449,7 +736,7 @@ function selectProblem(i, keepStep) {
   });
   if (!keepStep) idx = 0;
   document.querySelectorAll('.tab').forEach((t, j) => t.setAttribute('aria-selected', j === i ? 'true' : 'false'));
-  $('mname').textContent = `M${SUB[i + 1]} = (Q, Σ, δ, q₀, F)`;
+  $('mname').textContent = `M${subN(i + 1)} = (Q, Σ, δ, q₀, F)`;
   try { history.replaceState(null, '', '#' + P.id); } catch (e) {}
   showStep();
 }
@@ -489,7 +776,7 @@ function graphSVG(p, at, i, sm, pfx) {
 
   // aristas agrupadas por (origen, destino)
   const groups = {};
-  p.states.forEach(s => ['a', 'b'].forEach(x => {
+  p.states.forEach(s => p.sigma.forEach(x => {
     const to = p.delta[s.q][x][0], key = s.q + '>' + to;
     (groups[key] = groups[key] || { from: s.q, to, syms: [] }).syms.push(x);
   }));
@@ -545,13 +832,13 @@ function graphSVG(p, at, i, sm, pfx) {
 function deltaTable(p, at, i, sm) {
   const visQ = p.states.filter(s => at.added[s.q] <= i).map(s => s.q);
   const usedCell = sm && sm.lastCell;
-  let h = '<table><thead><tr><th>δ</th><th>a</th><th>b</th></tr></thead><tbody>';
+  let h = `<table><thead><tr><th>δ</th>${p.sigma.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>`;
   visQ.forEach(q => {
     const mark = (q === 'q0' ? '→ ' : '') + (at.final <= i && p.F.includes(q) ? '* ' : '');
     h += `<tr><td class="st">${mark}${qn(q)}</td>`;
-    ['a', 'b'].forEach(x => {
+    p.sigma.forEach(x => {
       const done = at.trans[q] <= i;
-      const c = usedCell === q + x ? 'used' : (at.trans[q] === i ? 'new' : '');
+      const c = usedCell === q + '|' + x ? 'used' : (at.trans[q] === i ? 'new' : '');
       h += `<td class="${c}">${done ? qn(p.delta[q][x][0]) : '<span class="pending">—</span>'}</td>`;
     });
     h += '</tr>';
@@ -569,7 +856,7 @@ function drawQuint() {
   const pend = '<span class="pending">pendiente</span>';
   const hlIf = (txt, on) => on ? `<span class="hl">${txt}</span>` : txt;
   $('qQ').innerHTML = visQ.length ? '{ ' + visQ.map(q => hlIf(qn(q), at.added[q] === idx)).join(', ') + ' }' : pend;
-  $('qS').innerHTML = at.sigma <= idx ? hlIf('{ a, b }', at.sigma === idx) : pend;
+  $('qS').innerHTML = at.sigma <= idx ? hlIf(`{ ${P.sigma.join(', ')} }`, at.sigma === idx) : pend;
   $('q0').innerHTML = at.added.q0 <= idx ? hlIf('q₀', at.added.q0 === idx) : pend;
   $('qF').innerHTML = at.final <= idx ? hlIf('{ ' + P.F.map(qn).join(', ') + ' }', at.final === idx) : pend;
   $('qD').innerHTML = visQ.length ? deltaTable(P, at, idx, sim) : pend;
@@ -591,9 +878,9 @@ function renderSections() {
         <div class="board static"><svg viewBox="0 0 600 400" role="img" aria-label="Diagrama de estados del problema ${i + 1}">${graphSVG(p, full(p), 999, null, 'mk' + i)}</svg></div>
         <div class="sec-info">
           <div class="qbox">
-            <div class="qtitle">M${SUB[i + 1]} = (Q, Σ, δ, q₀, F)</div>
+            <div class="qtitle">M${subN(i + 1)} = (Q, Σ, δ, q₀, F)</div>
             <div class="qrow"><span class="k">Q</span><span class="v">{ ${p.states.map(s => qn(s.q)).join(', ')} }</span></div>
-            <div class="qrow"><span class="k">Σ</span><span class="v">{ a, b }</span></div>
+            <div class="qrow"><span class="k">Σ</span><span class="v">{ ${p.sigma.join(', ')} }</span></div>
             <div class="qrow"><span class="k">q₀</span><span class="v">q₀</span></div>
             <div class="qrow"><span class="k">F</span><span class="v">{ ${p.F.map(qn).join(', ')} }</span></div>
             <div class="qrow"><span class="k">δ</span><span class="v dtab">${deltaTable(p, full(p), 999, null)}</span></div>
@@ -602,7 +889,7 @@ function renderSections() {
       </div>
       <div class="sec-cols">
         <div><h4>Interpretación del grafo</h4>
-          <ul class="interp">${p.states.map(s => `<li><code>${qn(s.q)}</code>${p.F.includes(s.q) ? ' <span class="acc">aceptación</span>' : ''}${s.q === 'q0' ? ' <span class="ini">inicial</span>' : ''}<span>${s.meaning}</span></li>`).join('')}</ul>
+          <ul class="interp">${p.states.map(s => `<li><code>${qn(s.q)}</code>${p.F.includes(s.q) ? ' <span class="acc">aceptación</span>' : ''}${s.q === 'q0' ? ' <span class="ini">inicial</span>' : ''}${s.trap ? ' <span class="trap">trampa</span>' : ''}<span>${s.meaning}</span></li>`).join('')}</ul>
         </div>
         <div class="sec-res">
           <div class="result"><span class="lbl">Expresión regular</span><code>${p.er}</code></div>
@@ -622,7 +909,7 @@ function renderSections() {
 function simShell() {
   return `<p>Escribe una cadena (o elige un ejemplo) y léela símbolo por símbolo. El estado actual se ilumina en el grafo y la flecha usada se resalta.</p>
   <div class="sim">
-    <div class="simin"><label for="cadena">Cadena de entrada (solo a y b; vacía = ε)</label>
+    <div class="simin"><label for="cadena">Cadena de entrada (solo ${P.sigma.join(' y ')}; vacía = ε)</label>
       <input id="cadena" autocomplete="off" spellcheck="false" maxlength="20">
       <button class="btn" id="sreset">Reiniciar</button></div>
     <div class="chips">${P.examples.map(e => `<button class="chip" data-w="${e}">${e || 'ε'}</button>`).join('')}</div>
@@ -642,7 +929,7 @@ function bindSim() {
 function simReset(w, fromInput) {
   stopRun();
   if (!fromInput) $('cadena').value = w;
-  const bad = /[^ab]/.test(w);
+  const bad = new RegExp(`[^${P.sigma.join('')}]`).test(w);
   sim = { w: bad ? '' : w, bad, i: 0, q: 'q0', log: [], lastEdge: null, lastCell: null };
   updateSim();
 }
@@ -650,7 +937,7 @@ function simStep() {
   if (!sim || sim.bad || sim.i >= sim.w.length) return;
   const x = sim.w[sim.i], to = P.delta[sim.q][x][0];
   sim.log.push(`δ(${qn(sim.q)}, ${x}) = ${qn(to)}`);
-  sim.lastEdge = sim.q + '>' + to; sim.lastCell = sim.q + x;
+  sim.lastEdge = sim.q + '>' + to; sim.lastCell = sim.q + '|' + x;
   sim.q = to; sim.i++;
   updateSim();
 }
@@ -699,9 +986,24 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') go(-1);
 });
 
-$('tabs').innerHTML = PROBLEMS.map((p, i) =>
-  `<button class="tab" role="tab" aria-selected="false" data-i="${i}"><b>${i + 1}</b>${p.short}</button>`).join('');
-document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => selectProblem(+t.dataset.i)));
+/* ---------- prácticas ---------- */
+$('practicas').innerHTML = PRACTICAS.map((pr, k) =>
+  `<button class="prac" role="tab" aria-selected="false" data-k="${k}">${pr.nombre}<span>${pr.detalle}</span></button>`).join('');
+document.querySelectorAll('.prac').forEach(b => b.addEventListener('click', () => selectPractice(+b.dataset.k, 0)));
+
+function selectPractice(k, i) {
+  PR = PRACTICAS[k]; PROBLEMS = PR.problems;
+  document.querySelectorAll('.prac').forEach((b, j) => b.setAttribute('aria-selected', j === k ? 'true' : 'false'));
+  $('eyebrow').textContent = PR.eyebrow;
+  $('gentext').innerHTML = PR.general;
+  $('gennota').innerHTML = PR.nota;
+  $('genpide').innerHTML = PR.pide.map(x => `<li>${x}</li>`).join('');
+  $('tabs').innerHTML = PROBLEMS.map((p, j) =>
+    `<button class="tab" role="tab" aria-selected="false" data-i="${j}"><b>${j + 1}</b>${p.short}</button>`).join('');
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => selectProblem(+t.dataset.i)));
+  renderSections();
+  selectProblem(i);
+}
 if (matchMedia('(max-width: 860px)').matches) $('stepsbox').removeAttribute('open');
 
 /* ---------- tema claro / oscuro ---------- */
@@ -716,7 +1018,8 @@ let savedTheme = 'system';
 try { savedTheme = localStorage.getItem('afd-tema') || 'system'; } catch (e) {}
 setTheme(savedTheme);
 
-renderSections();
-const start = Math.max(0, PROBLEMS.findIndex(p => '#' + p.id === location.hash));
-selectProblem(start);
+const hashId = location.hash.replace(/^#(sec-)?/, '');
+let startK = 0, startI = 0;
+PRACTICAS.forEach((pr, k) => pr.problems.forEach((p, i) => { if (p.id === hashId) { startK = k; startI = i; } }));
+selectPractice(startK, startI);
 </script>
